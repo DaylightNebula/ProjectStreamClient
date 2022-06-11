@@ -120,10 +120,13 @@ public class AssetClient
         // if avaiable packets
         if (packets.Count > 0)
         {
-            // process each packet
-            foreach (Packet packet in packets)
+            lock (packets)
             {
-                packetHandler.processPacket(packet.packetID, packet.data);
+                // process each packet
+                foreach (Packet packet in packets)
+                {
+                    packetHandler.processPacket(packet.packetID, packet.data);
+                }
             }
 
             // clear packet list

@@ -33,5 +33,6 @@ public enum InstructionButton
 public enum InstructionController
 {
     LEFT = 0x00,
-    RIGHT = 0x01
+    RIGHT = 0x01,
+    HMD = 0x02
 }

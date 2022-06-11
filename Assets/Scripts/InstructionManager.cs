@@ -161,7 +161,7 @@ public class InstructionManager
 
                 // end
                 break;
-            case 3:
+            case 3: // create raycast point
                 // unpack data
                 int point_id = BitConverter.ToInt32(data, 0);
                 Vector3 rotationOffset = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
@@ -214,7 +214,7 @@ public class InstructionManager
 
                 // end
                 break;
-            case 4:
+            case 4: // move entity to point
                 // unpack data
                 entity_id = BitConverter.ToInt32(data, 0);
                 point_id = BitConverter.ToInt32(data, 4);
@@ -235,6 +235,15 @@ public class InstructionManager
                 // teleport entity
                 entity.transform.position = pointPair.Key;
                 if (usePointDirection) entity.transform.localRotation = Quaternion.Euler(pointPair.Value + rotationOffset);
+
+                // end
+                break;
+            case 5: // call event
+                // break if behavior client does not exist
+                if (manager.behaviorClient == null) break;
+
+                // send packet
+                manager.behaviorClient.sendPacket(6, data);
 
                 // end
                 break;
