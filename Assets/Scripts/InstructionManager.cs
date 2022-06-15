@@ -274,6 +274,20 @@ public class InstructionManager
 
                 // end
                 break;
+            case 7:
+                // unpack
+                entity_id = BitConverter.ToInt32(data, 0);
+                bool showing = data[4] == 1;
+
+                // try to get entity
+                if (!manager.entities.ContainsKey(entity_id)) break;
+                entity = manager.entities[entity_id];
+
+                // set visibility
+                entity.SetActive(showing);
+
+                // end
+                break;
             default:
                 Debug.Log("No instruction made for id " + instruction.instructionID);
                 break;
