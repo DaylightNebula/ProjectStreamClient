@@ -16,6 +16,7 @@ public class InstructionManager
     Instruction[][] onGripChangeInstructions = new Instruction[2][];
     Instruction[][] whenGripNotZeroInstructions = new Instruction[2][];
     Instruction[][] onButtonPress = new Instruction[11][];
+    Instruction[][] onButtonReleased = new Instruction[11][];
 
     public InstructionManager(Manager manager)
     {
@@ -31,7 +32,8 @@ public class InstructionManager
     public void triggerNotZero(InstructionController con) { ExecuteInstructions(whenTriggerNotZeroInstructions[(int)con]); }
     public void gripChanged(InstructionController con) { ExecuteInstructions(onGripChangeInstructions[(int)con]); }
     public void gripNotZero(InstructionController con) { ExecuteInstructions(whenGripNotZeroInstructions[(int)con]); }
-    public void buttonPressed(InstructionButton button) { Debug.Log("Pressed " + ((int)button)); ExecuteInstructions(onButtonPress[(int)button]); }
+    public void buttonPressed(InstructionButton button) { ExecuteInstructions(onButtonPress[(int)button]); }
+    public void buttonReleased(InstructionButton button) { ExecuteInstructions(onButtonReleased[(int)button]); }
 
     // function to apply instructions lists
     public void applyInstructionList(int execute_id, int execute_data, Instruction[] instructions)
@@ -67,6 +69,9 @@ public class InstructionManager
                 break;
             case 9:
                 onButtonPress[execute_data] = instructions;
+                break;
+            case 10:
+                onButtonReleased[execute_data] = instructions;
                 break;
             default:
                 Debug.Log("No when execute function made for id " + execute_id);
@@ -234,6 +239,8 @@ public class InstructionManager
 
                 // teleport entity
                 entity.transform.position = pointPair.Key;
+                Debug.Log("Point Rotation: " + pointPair.Key);
+                Debug.Log("Rotation Offset: " + rotationOffset);
                 if (usePointDirection) entity.transform.localRotation = Quaternion.Euler(pointPair.Value + rotationOffset);
 
                 // end
@@ -244,6 +251,26 @@ public class InstructionManager
 
                 // send packet
                 manager.behaviorClient.sendPacket(6, data);
+
+                // end
+                break;
+            case 6:
+                // unpack
+                int point_id_a = BitConverter.ToInt32(data, 0);
+                int point_id_b = BitConverter.ToInt32(data, 4);
+                int new_point_id = BitConverter.ToInt32(data, 8);
+
+                // make sure point a and point b exist
+                if (!manager.points.ContainsKey(point_id_a) || !manager.points.ContainsKey(point_id_b)) break;
+
+                // get points
+                var point_a = manager.points[point_id_a];
+                var point_b = manager.points[point_id_b];
+
+                // create new point
+                Vector3 midpoint = (point_a.Key + point_b.Key) / 2;
+                Vector3 midpoint_rotation = (point_a.Value + point_b.Value) / 2;
+                manager.points[new_point_id] = new KeyValuePair<Vector3, Vector3>(midpoint, midpoint_rotation);
 
                 // end
                 break;

@@ -497,6 +497,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behaviorAddress: localhost
   behaviorPort: 35524
+  hmd: {fileID: 1045848415}
   leftController: {fileID: 1728657555}
   rightController: {fileID: 541096545}
   baseObject: {fileID: 4198128503522169538, guid: d0b306fed866cb049923eeca151d5cda,

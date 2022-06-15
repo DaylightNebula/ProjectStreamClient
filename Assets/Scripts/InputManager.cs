@@ -60,14 +60,14 @@ public class InputManager
     private void rGripPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.R_GRIP); manager.SendButtonPress(3); }
     private void rJoyPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.R_JOYSTICK); manager.SendButtonPress(5); }
 
-    private void aButtonReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(6); }
-    private void bButtonReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(7); }
-    private void xButtonReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(8); }
-    private void yButtonReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(9); }
-    private void lTriggerReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(0); }
-    private void lGripReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(2); }
-    private void lJoyReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(4); }
-    private void rTriggerReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(1); }
-    private void rGripReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(3); }
-    private void rJoyReleased(InputAction.CallbackContext callbackContext) { manager.SendButtonRelease(5); }
+    private void aButtonReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.A_BUTTON); manager.SendButtonRelease(6); }
+    private void bButtonReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.B_BUTTON); manager.SendButtonRelease(7); }
+    private void xButtonReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.X_BUTTON); manager.SendButtonRelease(8); }
+    private void yButtonReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.Y_BUTTON); manager.SendButtonRelease(9); }
+    private void lTriggerReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.L_TRIGGER); manager.SendButtonRelease(0); }
+    private void lGripReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.L_GRIP); manager.SendButtonRelease(2); }
+    private void lJoyReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.L_JOYSTICK); manager.SendButtonRelease(4); }
+    private void rTriggerReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_TRIGGER); manager.SendButtonRelease(1); }
+    private void rGripReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_GRIP); manager.SendButtonRelease(3); }
+    private void rJoyReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_JOYSTICK); manager.SendButtonRelease(5); }
 }
