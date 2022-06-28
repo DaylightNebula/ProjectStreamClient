@@ -503,6 +503,7 @@ MonoBehaviour:
   baseObject: {fileID: 4198128503522169538, guid: d0b306fed866cb049923eeca151d5cda,
     type: 3}
   shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  usingHeadset: 0
   aButton:
     m_Name: A Button
     m_Type: 1
@@ -587,6 +588,14 @@ MonoBehaviour:
       m_Groups: 
       m_Action: L Trigger Press
       m_Flags: 0
+    - m_Name: 
+      m_Id: 90663237-5925-421b-ae93-ef9d6b6aafec
+      m_Path: <Mouse>/leftButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: L Trigger Press
+      m_Flags: 0
     m_Flags: 0
   rTriggerPress:
     m_Name: R Trigger Press
@@ -599,6 +608,14 @@ MonoBehaviour:
     - m_Name: 
       m_Id: 1e969208-3905-43b6-83b4-87341338a073
       m_Path: <OculusTouchController>{RightHand}/triggerPressed
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: R Trigger Press
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 0cbba65b-caa7-428b-8272-b774828f2c97
+      m_Path: <Mouse>/rightButton
       m_Interactions: 
       m_Processors: 
       m_Groups: 
@@ -621,6 +638,14 @@ MonoBehaviour:
       m_Groups: 
       m_Action: L Grip Press
       m_Flags: 0
+    - m_Name: 
+      m_Id: 545b6f01-e321-44dc-b17b-17174816c018
+      m_Path: <Keyboard>/q
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: L Grip Press
+      m_Flags: 0
     m_Flags: 0
   rGripPress:
     m_Name: R Grip Press
@@ -633,6 +658,14 @@ MonoBehaviour:
     - m_Name: 
       m_Id: a633e525-8f7a-474e-8df7-c508ed0de75c
       m_Path: <OculusTouchController>{RightHand}/gripPressed
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: R Grip Press
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 4c11a46a-57d2-4e60-b3d6-2e28204867d2
+      m_Path: <Keyboard>/e
       m_Interactions: 
       m_Processors: 
       m_Groups: 

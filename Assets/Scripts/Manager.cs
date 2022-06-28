@@ -38,6 +38,9 @@ public class Manager : MonoBehaviour
     public Dictionary<int, GameObject> entities = new Dictionary<int, GameObject>();
     public Dictionary<int, KeyValuePair<Vector3, Vector3>> points = new Dictionary<int, KeyValuePair<Vector3, Vector3>>();
 
+    public bool usingHeadset = true;
+    DesktopMouseLook mouseLook;
+
     public InputAction aButton;
     public InputAction bButton;
     public InputAction xButton;
@@ -102,6 +105,22 @@ public class Manager : MonoBehaviour
     {
         // set last positions for tracked devices deltas
         UpdateLastPositionsOfTrackedDevices();
+
+        // if not using headset, initialize mouse look
+        if (!usingHeadset)
+        {
+            mouseLook = new DesktopMouseLook();
+            mouseLook.Start(hmd, leftController, rightController);
+        }
+    }
+
+    void Update()
+    {
+        // if not using headset, update mouse look
+        if (!usingHeadset)
+        {
+            mouseLook.Update();
+        }
     }
 
     void FixedUpdate()

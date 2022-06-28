@@ -223,7 +223,7 @@ public class InstructionManager
                 // unpack data
                 entity_id = BitConverter.ToInt32(data, 0);
                 point_id = BitConverter.ToInt32(data, 4);
-                bool usePointDirection = data[0] == 1;
+                bool usePointDirection = data[8] == 1;
                 rotationOffset = new Vector3(BitConverter.ToSingle(data, 9), BitConverter.ToSingle(data, 13), BitConverter.ToSingle(data, 17));
 
                 // if neither entities or point maps have keys, throw error and break
@@ -238,10 +238,10 @@ public class InstructionManager
                 var pointPair = manager.points[point_id];
 
                 // teleport entity
-                entity.transform.position = pointPair.Key;
-                Debug.Log("Point Rotation: " + pointPair.Key);
-                Debug.Log("Rotation Offset: " + rotationOffset);
-                if (usePointDirection) entity.transform.localRotation = Quaternion.Euler(pointPair.Value + rotationOffset);
+                rotation = Quaternion.identity;
+                if (usePointDirection) rotation = Quaternion.Euler(pointPair.Value + rotationOffset);
+                Debug.Log("Use point direction? " + usePointDirection + ", rotation euler: " + rotation.eulerAngles);
+                entity.transform.SetPositionAndRotation(pointPair.Key, rotation);
 
                 // end
                 break;
