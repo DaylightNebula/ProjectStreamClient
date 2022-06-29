@@ -254,7 +254,7 @@ public class InstructionManager
 
                 // end
                 break;
-            case 6:
+            case 6: // create point from mid point of two points
                 // unpack
                 int point_id_a = BitConverter.ToInt32(data, 0);
                 int point_id_b = BitConverter.ToInt32(data, 4);
@@ -274,7 +274,7 @@ public class InstructionManager
 
                 // end
                 break;
-            case 7:
+            case 7: // change entity visibility
                 // unpack
                 entity_id = BitConverter.ToInt32(data, 0);
                 bool showing = data[4] == 1;
@@ -285,6 +285,32 @@ public class InstructionManager
 
                 // set visibility
                 entity.SetActive(showing);
+
+                // end
+                break;
+            case 8: // move entity
+                // unpack
+                entity_id = BitConverter.ToInt32(data, 0);
+                Vector3 xyz = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
+                float timeToComplete = BitConverter.ToSingle(data, 16);
+                bool isAdditive = data[20] == 1;
+
+                // try to get entity
+                if (!manager.entities.ContainsKey(entity_id)) break;
+                entity = manager.entities[entity_id];
+
+                // get target position
+                Vector3 targetPosition = xyz;
+                if (isAdditive) targetPosition += entity.transform.position;
+
+                // if time to complete if greater than 0, run it over ttime
+                if (timeToComplete > 0f)
+                {
+                    MoveObjectToLocationOverTime move = entity.AddComponent<MoveObjectToLocationOverTime>();
+                    move.Start(targetPosition, timeToComplete);
+                }
+                // otherwise, just update position
+                else entity.transform.position = targetPosition;
 
                 // end
                 break;
