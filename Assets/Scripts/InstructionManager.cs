@@ -307,7 +307,7 @@ public class InstructionManager
                 if (timeToComplete > 0f)
                 {
                     MoveObjectToLocationOverTime move = entity.AddComponent<MoveObjectToLocationOverTime>();
-                    move.Start(targetPosition, timeToComplete);
+                    move.init(targetPosition, timeToComplete);
                 }
                 // otherwise, just update position
                 else entity.transform.position = targetPosition;

@@ -9,7 +9,7 @@ public class MoveObjectToLocationOverTime : MonoBehaviour
     float timeTarget;
 
     public float currentTime = 0f;
-    public void Start(Vector3 target, float timeTarget)
+    public void init(Vector3 target, float timeTarget)
     {
         this.target = target;
         this.timeTarget = timeTarget;
