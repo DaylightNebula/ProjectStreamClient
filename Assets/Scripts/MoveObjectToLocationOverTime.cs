@@ -23,7 +23,6 @@ public class MoveObjectToLocationOverTime : MonoBehaviour
 
         // move object towards target
         Vector3 move = moveDelta * (Time.deltaTime / timeTarget);
-        Debug.Log("Distance to target: " + Vector3.Distance(transform.position, target));
         transform.position += move;
 
         // remove if we have been alive for long enough
