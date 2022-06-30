@@ -8,8 +8,9 @@ public class DesktopMouseLook
     GameObject headset, leftController, rightController;
 
     // mouse look variables
-    public float sensitivityX = 15F;
-    public float sensitivityY = 15F;
+    public float sensitivityX = 10F;
+    public float sensitivityY = 10F;
+    public float WASDsensitivity = 8F;
     public float minimumX = -360F;
     public float maximumX = 360F;
     public float minimumY = -60F;
@@ -74,6 +75,23 @@ public class DesktopMouseLook
         headset.transform.localRotation = newRotation;
         leftController.transform.localRotation = newRotation;
         rightController.transform.localRotation = newRotation;
+
+        // get movement amount
+        float forwardMove = 0f;
+        float rightMove = 0f;
+        if (Input.GetKey(KeyCode.W)) forwardMove = WASDsensitivity;
+        if (Input.GetKey(KeyCode.S)) forwardMove = -WASDsensitivity;
+        if (Input.GetKey(KeyCode.A)) rightMove = -WASDsensitivity;
+        if (Input.GetKey(KeyCode.D)) rightMove = WASDsensitivity;
+        forwardMove *= Time.deltaTime;
+        rightMove *= Time.deltaTime;
+        Vector3 headsetForward = new Vector3(headset.transform.forward.x, 0f, headset.transform.forward.z);
+        Vector3 headsetRight = new Vector3(headset.transform.right.x, 0f, headset.transform.right.z);
+        headsetForward.Normalize();
+        headsetRight.Normalize();
+        headset.transform.position += (headsetForward * forwardMove) + (headsetRight * rightMove);
+        leftController.transform.position = headset.transform.position;
+        rightController.transform.position = headset.transform.position;
     }
 
     public float ClampAngle(float angle, float min, float max)
