@@ -37,6 +37,7 @@ public class Manager : MonoBehaviour
     public Dictionary<int, Mesh> meshes = new Dictionary<int, Mesh>();
     public Dictionary<int, GameObject> entities = new Dictionary<int, GameObject>();
     public Dictionary<int, KeyValuePair<Vector3, Vector3>> points = new Dictionary<int, KeyValuePair<Vector3, Vector3>>();
+    public Dictionary<int, AudioClip> sounds = new Dictionary<int, AudioClip>();
 
     public bool usingHeadset = true;
     DesktopMouseLook mouseLook;
@@ -69,14 +70,14 @@ public class Manager : MonoBehaviour
 
     public void makeMeshExist(int meshID)
     {
-        if (!meshes.ContainsKey(meshID) && !assetPacketHandler.requestedMesh.Contains(meshID))
-            assetPacketHandler.requestMesh(meshID);
+        if (!meshes.ContainsKey(meshID) && !assetPacketHandler.meshAssetManager.requestedMesh.Contains(meshID))
+            assetPacketHandler.meshAssetManager.Request(this, meshID);
     }
 
     public void makeMaterialExist(int materialID)
     {
-        if (!meshes.ContainsKey(materialID) && !assetPacketHandler.requestedMaterials.Contains(materialID))
-            assetPacketHandler.requestMaterial(materialID);
+        if (!meshes.ContainsKey(materialID) && !assetPacketHandler.materialAssetManager.requestedMaterials.Contains(materialID))
+            assetPacketHandler.materialAssetManager.Request(this, materialID);
     }
 
     public void setMaterial(Renderer renderer, int materialID)
