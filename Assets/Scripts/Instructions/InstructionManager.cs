@@ -340,6 +340,39 @@ public class InstructionManager
 
                 // end
                 break;
+            case 11:
+                // unpack
+                int texture_id = BitConverter.ToInt32(data, 0);
+                Vector3 emitter_position = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
+                float emitter_lifetime_seconds = BitConverter.ToSingle(data, 16);
+                float particles_rate = BitConverter.ToSingle(data, 20);
+                float particle_duration = BitConverter.ToSingle(data, 24);
+                float particle_speed = BitConverter.ToSingle(data, 28);
+                Vector3 particle_direction_scale = new Vector3(BitConverter.ToSingle(data, 32), BitConverter.ToSingle(data, 36), BitConverter.ToSingle(data, 40));
+                float particle_size = BitConverter.ToSingle(data, 44);
+
+                // create object and get components
+                GameObject emitter = GameObject.Instantiate(manager.baseParticle, emitter_position, Quaternion.identity);
+                ParticleSystem particleSystem = emitter.GetComponent<ParticleSystem>();
+                DestroyAfterTime destroyer = emitter.GetComponent<DestroyAfterTime>();
+
+                // set kill time
+                destroyer.destroySeconds = emitter_lifetime_seconds;
+
+                // set particle
+                particleSystem.startLifetime = particle_duration;
+                particleSystem.startSpeed = particle_speed;
+                particleSystem.startSize = particle_size;
+                ParticleSystem.EmissionModule emission = particleSystem.emission;
+                emission.rate = particles_rate;
+                ParticleSystem.ShapeModule shape = particleSystem.shape;
+                shape.scale = particle_direction_scale;
+
+                // set particle texture
+                manager.assetPacketHandler.textureAssetManager.setTexture(manager, emitter.GetComponent<ParticleSystemRenderer>(), texture_id);
+
+                // end
+                break;
             default:
                 Debug.Log("No instruction made for id " + instruction.instructionID);
                 break;

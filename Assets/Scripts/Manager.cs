@@ -31,7 +31,9 @@ public class Manager : MonoBehaviour
     Vector3 rControllerLastRotation;
 
     public GameObject baseObject;
+    public GameObject baseParticle;
     public Shader shader;
+    public Shader particleShader;
     public Dictionary<int, Texture2D> textures = new Dictionary<int, Texture2D>();
     public Dictionary<int, Material> materials = new Dictionary<int, Material>();
     public Dictionary<int, Mesh> meshes = new Dictionary<int, Mesh>();
