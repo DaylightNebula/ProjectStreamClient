@@ -215,7 +215,7 @@ public class InstructionManager
                     pointRotation = Vector3.up;
 
                 // save point and its rotation
-                manager.points[point_id] = new KeyValuePair<Vector3, Vector3>(point, pointRotation);
+                manager.UpdatePointLocation(point_id, point, pointRotation);
 
                 // end
                 break;
@@ -227,7 +227,7 @@ public class InstructionManager
                 rotationOffset = new Vector3(BitConverter.ToSingle(data, 9), BitConverter.ToSingle(data, 13), BitConverter.ToSingle(data, 17));
 
                 // if neither entities or point maps have keys, throw error and break
-                if (!manager.entities.ContainsKey(entity_id) || !manager.points.ContainsKey(point_id))
+                if (!manager.entities.ContainsKey(entity_id) || !manager.DoesPointExist(point_id))
                 {
                     Debug.LogError("Either point " + point_id + " or entity " + entity_id + " does not exist!");
                     break;
@@ -235,12 +235,11 @@ public class InstructionManager
 
                 // get point and entity
                 entity = manager.entities[entity_id];
-                var pointPair = manager.points[point_id];
+                var pointPair = manager.GetPointLocation(point_id);
 
                 // teleport entity
                 rotation = Quaternion.identity;
                 if (usePointDirection) rotation = Quaternion.Euler(pointPair.Value + rotationOffset);
-                Debug.Log("Use point direction? " + usePointDirection + ", rotation euler: " + rotation.eulerAngles);
                 entity.transform.SetPositionAndRotation(pointPair.Key, rotation);
 
                 // end
@@ -261,16 +260,16 @@ public class InstructionManager
                 int new_point_id = BitConverter.ToInt32(data, 8);
 
                 // make sure point a and point b exist
-                if (!manager.points.ContainsKey(point_id_a) || !manager.points.ContainsKey(point_id_b)) break;
+                if (!manager.DoesPointExist(point_id_a) || !manager.DoesPointExist(point_id_b)) break;
 
                 // get points
-                var point_a = manager.points[point_id_a];
-                var point_b = manager.points[point_id_b];
+                var point_a = manager.GetPointLocation(point_id_a);
+                var point_b = manager.GetPointLocation(point_id_b);
 
                 // create new point
                 Vector3 midpoint = (point_a.Key + point_b.Key) / 2;
                 Vector3 midpoint_rotation = (point_a.Value + point_b.Value) / 2;
-                manager.points[new_point_id] = new KeyValuePair<Vector3, Vector3>(midpoint, midpoint_rotation);
+                manager.UpdatePointLocation(new_point_id, midpoint, midpoint_rotation);
 
                 // end
                 break;
@@ -311,6 +310,33 @@ public class InstructionManager
                 }
                 // otherwise, just update position
                 else entity.transform.position = targetPosition;
+
+                // end
+                break;
+            case 9: // load asset instruction
+                // unpack
+                int asset_id = BitConverter.ToInt32(data, 0);
+                byte asset_type_id = data[4];
+
+                // get asset manager and tell it to request asset_id
+                manager.assetPacketHandler.assetManagers[asset_type_id].Request(manager, asset_id);
+
+                // end
+                break;
+            case 10: // play sound
+                // unpack
+                int sound_id = BitConverter.ToInt32(data, 0);
+                entity_id = BitConverter.ToInt32(data, 4);
+                float sound_speed = BitConverter.ToSingle(data, 8);
+                float sound_volume = BitConverter.ToSingle(data, 12);
+                bool wait_for_download = data[16] == 1;
+
+                // try to get entity
+                if (!manager.entities.ContainsKey(entity_id)) break;
+                entity = manager.entities[entity_id];
+
+                // play sound
+                manager.assetPacketHandler.soundAssetManager.playSoundFromObject(manager, entity, sound_id, sound_volume, wait_for_download);
 
                 // end
                 break;

@@ -9,13 +9,19 @@ public class AssetPacketHandler
     Manager manager;
     AssetClient client;
 
+    public Dictionary<int, AssetManager> assetManagers = new Dictionary<int, AssetManager>();
     public TextureAssetManager textureAssetManager = new TextureAssetManager();
     public MaterialAssetManager materialAssetManager = new MaterialAssetManager();
     public MeshAssetManager meshAssetManager = new MeshAssetManager();
+    public SoundAssetManager soundAssetManager = new SoundAssetManager();
 
     public AssetPacketHandler(Manager manager)
     {
         this.manager = manager;
+        assetManagers.Add(textureAssetManager.getAssetID(), textureAssetManager);
+        assetManagers.Add(materialAssetManager.getAssetID(), materialAssetManager);
+        assetManagers.Add(meshAssetManager.getAssetID(), meshAssetManager);
+        assetManagers.Add(soundAssetManager.getAssetID(), soundAssetManager);
     }
 
     public void setClient(AssetClient client)
@@ -47,6 +53,12 @@ public class AssetPacketHandler
                 break;
             case 6:
                 meshAssetManager.ProcessData(manager, data);
+                break;
+            case 7:
+                Debug.LogWarning("We do not have the sound cache!");
+                break;
+            case 8:
+                soundAssetManager.ProcessData(manager, data);
                 break;
             default:
                 break;

@@ -36,8 +36,7 @@ public class Manager : MonoBehaviour
     public Dictionary<int, Material> materials = new Dictionary<int, Material>();
     public Dictionary<int, Mesh> meshes = new Dictionary<int, Mesh>();
     public Dictionary<int, GameObject> entities = new Dictionary<int, GameObject>();
-    public Dictionary<int, KeyValuePair<Vector3, Vector3>> points = new Dictionary<int, KeyValuePair<Vector3, Vector3>>();
-    public Dictionary<int, AudioClip> sounds = new Dictionary<int, AudioClip>();
+    private Dictionary<int, KeyValuePair<Vector3, Vector3>> points = new Dictionary<int, KeyValuePair<Vector3, Vector3>>();
 
     public bool usingHeadset = true;
     DesktopMouseLook mouseLook;
@@ -173,6 +172,49 @@ public class Manager : MonoBehaviour
 
         // send packet
         behaviorClient.sendPacket(3, data);
+    }
+
+    public void UpdatePointLocation(int pointID, Vector3 position, Vector3 rotation)
+    {
+        points[pointID] = new KeyValuePair<Vector3, Vector3>(position, rotation);
+        SendPointUpdateLocation(pointID, position, rotation);
+    }
+
+    public KeyValuePair<Vector3, Vector3> GetPointLocation(int pointID)
+    {
+        return points[pointID];
+    }
+
+    public bool DoesPointExist(int pointID)
+    {
+        return points.ContainsKey(pointID);
+    }
+
+    private void SendPointUpdateLocation(int pointID, Vector3 position, Vector3 rotation)
+    {
+        // make sure behavior client exists
+        if (behaviorClient == null) return;
+
+        // build int array for id
+        int[] id = new int[1];
+        id[0] = pointID;
+
+        // build float array
+        float[] floats = new float[12];
+        floats[0] = position.x;
+        floats[1] = position.y;
+        floats[2] = position.z;
+        floats[3] = rotation.x;
+        floats[4] = rotation.y;
+        floats[5] = rotation.z;
+
+        // build packet
+        byte[] data = new byte[28];
+        Buffer.BlockCopy(id, 0, data, 0, 4);
+        Buffer.BlockCopy(floats, 0, data, 4, 24);
+
+        // send packet
+        behaviorClient.sendPacket(7, data);
     }
 
     private void UpdateLastPositionsOfTrackedDevices()
