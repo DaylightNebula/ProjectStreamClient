@@ -340,7 +340,7 @@ public class InstructionManager
 
                 // end
                 break;
-            case 11:
+            case 11: // create particle emitter
                 // unpack
                 int texture_id = BitConverter.ToInt32(data, 0);
                 Vector3 emitter_position = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
@@ -370,6 +370,41 @@ public class InstructionManager
 
                 // set particle texture
                 manager.assetPacketHandler.textureAssetManager.setTexture(manager, emitter.GetComponent<ParticleSystemRenderer>(), texture_id);
+
+                // end
+                break;
+            case 12: // set entity collideable
+                // unpack
+                entity_id = BitConverter.ToInt32(data, 0);
+                bool is_collideable = data[4] == 1;
+
+                // try to get entity
+                if (!manager.entities.ContainsKey(entity_id)) break;
+                entity = manager.entities[entity_id];
+
+                // check if entity has a mesh collider
+                MeshCollider meshCollider = entity.GetComponent<MeshCollider>();
+
+                // if should be collideable, make sure they have a mesh collider that is setup
+                if (is_collideable && meshCollider == null)
+                {
+                    meshCollider = entity.AddComponent<MeshCollider>();
+                    filter = entity.GetComponent<MeshFilter>();
+                    if (filter.mesh.vertexCount == 0)
+                    {
+                        Debug.Log("Filter mesh does not exist!");
+                        foreach (MeshAssetManager.WaitingForMesh waiting in manager.assetPacketHandler.meshAssetManager.waitingForMesh)
+                        {
+                            if (waiting.filter == filter)
+                                waiting.collider = meshCollider;
+                        }
+                    }
+                    else
+                        meshCollider.sharedMesh = filter.mesh;
+                }
+                // otherwise, make sure they do not have a mesh collider
+                else if (!is_collideable && meshCollider != null)
+                    manager.DestroyUnityObject(meshCollider);
 
                 // end
                 break;

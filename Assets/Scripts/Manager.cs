@@ -114,6 +114,10 @@ public class Manager : MonoBehaviour
             mouseLook = new DesktopMouseLook();
             mouseLook.Start(hmd, leftController, rightController);
         }
+
+        // enable vsync
+        //QualitySettings.vSyncCount = 0;
+        //Application.targetFrameRate = 60;
     }
 
     void Update()
@@ -258,5 +262,10 @@ public class Manager : MonoBehaviour
         // dispose server connections
         if (behaviorClient != null) behaviorClient.dispose();
         if (assetClient != null) assetClient.dispose();
+    }
+
+    public void DestroyUnityObject(UnityEngine.Object obj)
+    {
+        Destroy(obj);
     }
 }

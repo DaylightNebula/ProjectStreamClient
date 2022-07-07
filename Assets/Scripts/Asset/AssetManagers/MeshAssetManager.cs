@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MeshAssetManager : AssetManager
 {
-    List<WaitingForMesh> waitingForMesh = new List<WaitingForMesh>();
+    public List<WaitingForMesh> waitingForMesh = new List<WaitingForMesh>();
     public List<int> requestedMesh = new List<int>();
 
     public override int getAssetID() => 0;
@@ -103,6 +103,7 @@ public class MeshAssetManager : AssetManager
                 if (waiting.meshID == id)
                 {
                     if (waiting.filter != null) waiting.filter.mesh = meshes[0]; // todo better handling for multiple instances
+                    if (waiting.collider != null) waiting.collider.sharedMesh = meshes[0];
                     waiting.shouldRemove = true;
                 }
             }
@@ -133,11 +134,12 @@ public class MeshAssetManager : AssetManager
         }
     }
 
-    class WaitingForMesh
+    public class WaitingForMesh
     {
         public MeshFilter filter;
         public int meshID;
 
+        public MeshCollider collider = null;
         public bool shouldRemove = false;
 
         public WaitingForMesh(MeshFilter filter, int meshID)
