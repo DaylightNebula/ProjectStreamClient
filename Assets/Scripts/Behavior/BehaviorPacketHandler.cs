@@ -48,19 +48,17 @@ public class BehaviorPacketHandler
                 int numberOfInstructions = BitConverter.ToInt32(data, 2);
 
                 // create instruction array
-                Instruction[] instructions = new Instruction[numberOfInstructions];
+                InstructionData[] instructions = new InstructionData[numberOfInstructions];
 
                 // create counter to current byte
                 int currentByte = 6;
 
-                Debug.Log("Loading " + numberOfInstructions + " instructions");
                 // loop through each instruction to unpack
                 for (int i = 0; i < numberOfInstructions; i++)
                 {
                     // get instruction header
                     int instructionID = data[currentByte];
                     int instructionSize = BitConverter.ToInt32(data, currentByte + 1);
-                    Debug.Log("Converting instruction " + instructionID + " with length " + instructionSize);
                     currentByte += 5;
 
                     // get instruction bytes
@@ -69,7 +67,7 @@ public class BehaviorPacketHandler
                     currentByte += instructionSize;
 
                     // create instruction
-                    instructions[i] = new Instruction(instructionID, instructionSize, instructionBytes);
+                    instructions[i] = new InstructionData(instructionID, instructionSize, instructionBytes);
                 }
 
                 // apply instruction list

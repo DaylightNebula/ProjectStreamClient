@@ -2,9 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Instruction
+public abstract class Instruction
 {
-    public Instruction(int id, int byteLength, byte[] data)
+    // stuff for tracking instructions
+    public static Dictionary<int, Instruction> instructions = new Dictionary<int, Instruction>();
+    public Instruction()
+    {
+        Instruction.instructions.Add(getID(), this);
+    }
+
+    // abstract stuff for creating new instructions
+    public abstract int getID();
+    public abstract void execute(Manager manager, byte[] data);
+}
+public struct InstructionData
+{
+    public InstructionData(int id, int byteLength, byte[] data)
     {
         instructionID = id;
         instructionByteLength = byteLength;

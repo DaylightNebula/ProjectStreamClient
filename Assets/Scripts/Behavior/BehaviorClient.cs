@@ -124,7 +124,6 @@ public class BehaviorClient
             foreach (Packet packet in packets)
             {
                 packetHandler.processPacket(packet.packetID, packet.data);
-                UnityEngine.Debug.Log("Processed packet " + packet.packetID);
             }
 
             // clear packet list

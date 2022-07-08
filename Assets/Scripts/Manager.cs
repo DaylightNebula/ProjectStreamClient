@@ -32,6 +32,7 @@ public class Manager : MonoBehaviour
 
     public GameObject baseObject;
     public GameObject baseParticle;
+    public GameObject baseLight;
     public Shader shader;
     public Shader particleShader;
     public Dictionary<int, Texture2D> textures = new Dictionary<int, Texture2D>();
