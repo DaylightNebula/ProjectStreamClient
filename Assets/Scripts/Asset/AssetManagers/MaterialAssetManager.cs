@@ -52,7 +52,7 @@ public class MaterialAssetManager : AssetManager
             {
                 if (id == waiting.materialID)
                 {
-                    if (waiting.renderer != null) waiting.renderer.material = mat;
+                    if (waiting.entityManager.meshRenderer != null) waiting.entityManager.meshRenderer.material = mat;
                     waiting.shouldRemove = true;
                 }
             }
@@ -65,19 +65,19 @@ public class MaterialAssetManager : AssetManager
         return waiting.shouldRemove;
     }
 
-    public void setMaterial(Manager manager, Renderer renderer, int materialID)
+    public void setMaterial(Manager manager, EntityManager entityManager)
     {
-        if (manager.materials.ContainsKey(materialID))
+        if (manager.materials.ContainsKey(entityManager.materialID))
         {
-            renderer.material = manager.materials[materialID];
+            entityManager.meshRenderer.material = manager.materials[entityManager.materialID];
         }
         else
         {
             lock (waitingForMaterialList)
             {
-                waitingForMaterialList.Add(new WaitingForMaterial(renderer, materialID));
+                waitingForMaterialList.Add(new WaitingForMaterial(entityManager, entityManager.materialID));
             }
-            Request(manager, materialID);
+            Request(manager, entityManager.materialID);
         }
     }
 
@@ -90,14 +90,14 @@ public class MaterialAssetManager : AssetManager
 
     class WaitingForMaterial
     {
-        public Renderer renderer;
+        public EntityManager entityManager;
         public int materialID;
 
         public bool shouldRemove = false;
 
-        public WaitingForMaterial(Renderer renderer, int materialID)
+        public WaitingForMaterial(EntityManager entityManager, int materialID)
         {
-            this.renderer = renderer;
+            this.entityManager = entityManager;
             this.materialID = materialID;
         }
     }

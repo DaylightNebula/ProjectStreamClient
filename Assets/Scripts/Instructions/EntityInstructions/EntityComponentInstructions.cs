@@ -15,7 +15,10 @@ public class SetEntityCollideableInstruction : Instruction
         if (!manager.entities.ContainsKey(entity_id)) return;
         GameObject entity = manager.entities[entity_id];
 
-        // check if entity has a mesh collider
+        // tell entity manager to apply a mesh collider
+        entity.GetComponent<EntityManager>().setCollideable(is_collideable);
+
+        /*// check if entity has a mesh collider
         MeshCollider meshCollider = entity.GetComponent<MeshCollider>();
 
         // if should be collideable, make sure they have a mesh collider that is setup
@@ -27,8 +30,8 @@ public class SetEntityCollideableInstruction : Instruction
             {
                 foreach (MeshAssetManager.WaitingForMesh waiting in manager.assetPacketHandler.meshAssetManager.waitingForMesh)
                 {
-                    if (waiting.filter == filter)
-                        waiting.collider = meshCollider;
+                    if (waiting.entityManager.meshFilter == filter)
+                        waiting.entityManager.collider = meshCollider;
                 }
             }
             else
@@ -36,7 +39,7 @@ public class SetEntityCollideableInstruction : Instruction
         }
         // otherwise, make sure they do not have a mesh collider
         else if (!is_collideable && meshCollider != null)
-            manager.DestroyUnityObject(meshCollider);
+            manager.DestroyUnityObject(meshCollider);*/
 
     }
 }

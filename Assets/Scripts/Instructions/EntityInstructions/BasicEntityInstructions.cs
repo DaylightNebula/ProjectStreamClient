@@ -19,11 +19,11 @@ public class CreateEntityInstruction : Instruction
         GameObject entity = GameObject.Instantiate(manager.baseObject, position, rotation);
         manager.entities.Add(entity_id, entity);
 
-        // apply mesh and material
-        MeshFilter filter = entity.GetComponent<MeshFilter>();
-        Renderer renderer = entity.GetComponent<Renderer>();
-        manager.setMesh(filter, mesh_id);
-        manager.setMaterial(renderer, material_id);
+        // update entity manager
+        EntityManager entityManager = entity.GetComponent<EntityManager>();
+        entityManager.manager = manager;
+        entityManager.addMesh(mesh_id);
+        entityManager.addMaterial(material_id);
 
         // apply scale
         entity.transform.localScale = scale;

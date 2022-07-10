@@ -106,15 +106,8 @@ public class InstructionManager
 
     public void ExecuteInstruction(InstructionData inData)
     {
-        try // TODO remove
-        {
-            // execute instruction
-            Instruction instruction = Instruction.instructions[inData.instructionID];
-            if (instruction != null) instruction.execute(manager, inData.instructionData);
-        }
-        catch (Exception ex) {
-            Debug.LogError(ex.Message);
-            Application.Quit();
-        }
+        // execute instruction
+        Instruction instruction = Instruction.instructions[inData.instructionID];
+        if (instruction != null) instruction.execute(manager, inData.instructionData);
     }
 }

@@ -82,14 +82,14 @@ public class Manager : MonoBehaviour
             assetPacketHandler.materialAssetManager.Request(this, materialID);
     }
 
-    public void setMaterial(Renderer renderer, int materialID)
+    public void setMaterial(EntityManager entityManager)
     {
-        assetPacketHandler.setMaterial(renderer, materialID);
+        assetPacketHandler.setMaterial(entityManager);
     }
 
-    public void setMesh(MeshFilter filter, int meshID)
+    public void setMesh(EntityManager entityManager)
     {
-        assetPacketHandler.setMesh(filter, meshID);
+        assetPacketHandler.setMesh(entityManager);
     }
 
     public void ConnectToAssetServer(string address, int port)

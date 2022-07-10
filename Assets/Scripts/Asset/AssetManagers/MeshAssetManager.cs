@@ -102,8 +102,8 @@ public class MeshAssetManager : AssetManager
             {
                 if (waiting.meshID == id)
                 {
-                    if (waiting.filter != null) waiting.filter.mesh = meshes[0]; // todo better handling for multiple instances
-                    if (waiting.collider != null) waiting.collider.sharedMesh = meshes[0];
+                    if (waiting.entityManager.meshFilter != null) waiting.entityManager.meshFilter.mesh = meshes[0]; // todo better handling for multiple instances
+                    if (waiting.entityManager.collider != null) waiting.entityManager.collider.sharedMesh = meshes[0];
                     waiting.shouldRemove = true;
                 }
             }
@@ -118,33 +118,32 @@ public class MeshAssetManager : AssetManager
         return waiting.shouldRemove;
     }
 
-    public void setMesh(Manager manager, MeshFilter filter, int meshID)
+    public void setMesh(Manager manager, EntityManager entityManager)
     {
-        if (manager.meshes.ContainsKey(meshID))
+        if (manager.meshes.ContainsKey(entityManager.meshID))
         {
-            filter.mesh = manager.meshes[meshID];
+            entityManager.meshFilter.mesh = manager.meshes[entityManager.meshID];
         }
         else
         {
             lock (waitingForMesh)
             {
-                waitingForMesh.Add(new WaitingForMesh(filter, meshID));
+                waitingForMesh.Add(new WaitingForMesh(entityManager, entityManager.meshID));
             }
-            Request(manager, meshID);
+            Request(manager, entityManager.meshID);
         }
     }
 
     public class WaitingForMesh
     {
-        public MeshFilter filter;
+        public EntityManager entityManager;
         public int meshID;
 
-        public MeshCollider collider = null;
         public bool shouldRemove = false;
 
-        public WaitingForMesh(MeshFilter filter, int meshID)
+        public WaitingForMesh(EntityManager entityManager, int meshID)
         {
-            this.filter = filter;
+            this.entityManager = entityManager;
             this.meshID = meshID;
         }
     }
