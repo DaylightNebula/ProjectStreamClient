@@ -32,6 +32,8 @@ public class InstructionManager
     public CreateLightInstruction createLightInstruction = new CreateLightInstruction();
     public CallEventInstruction callEventInstruction = new CallEventInstruction();
     public LoadAssetInstruction loadAssetInstruction = new LoadAssetInstruction();
+    public SetMeshInstruction setMeshInstruction = new SetMeshInstruction();
+    public SetMaterialInstruction setMaterialInstruction = new SetMaterialInstruction();
 
     public InstructionManager(Manager manager)
     {
@@ -107,6 +109,11 @@ public class InstructionManager
     public void ExecuteInstruction(InstructionData inData)
     {
         // execute instruction
+        if (!Instruction.instructions.ContainsKey(inData.instructionID))
+        {
+            Debug.LogWarning("Instruction with ID" + inData.instructionID + " does not exist!");
+            return;
+        }
         Instruction instruction = Instruction.instructions[inData.instructionID];
         if (instruction != null) instruction.execute(manager, inData.instructionData);
     }

@@ -9,21 +9,16 @@ public class CreateEntityInstruction : Instruction
     {
         // unpack data
         int entity_id = BitConverter.ToInt32(data, 0);
-        int mesh_id = BitConverter.ToInt32(data, 4);
-        int material_id = BitConverter.ToInt32(data, 8);
-        Vector3 position = new Vector3(BitConverter.ToSingle(data, 12), BitConverter.ToSingle(data, 16), BitConverter.ToSingle(data, 20));
-        Quaternion rotation = Quaternion.Euler(BitConverter.ToSingle(data, 24), BitConverter.ToSingle(data, 28), BitConverter.ToSingle(data, 32));
-        Vector3 scale = new Vector3(BitConverter.ToSingle(data, 36), BitConverter.ToSingle(data, 40), BitConverter.ToSingle(data, 44));
+        Vector3 position = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
+        Quaternion rotation = Quaternion.Euler(BitConverter.ToSingle(data, 16), BitConverter.ToSingle(data, 20), BitConverter.ToSingle(data, 24));
+        Vector3 scale = new Vector3(BitConverter.ToSingle(data, 28), BitConverter.ToSingle(data, 32), BitConverter.ToSingle(data, 36));
 
         // create entity
         GameObject entity = GameObject.Instantiate(manager.baseObject, position, rotation);
         manager.entities.Add(entity_id, entity);
 
         // update entity manager
-        EntityManager entityManager = entity.GetComponent<EntityManager>();
-        entityManager.manager = manager;
-        entityManager.addMesh(mesh_id);
-        entityManager.addMaterial(material_id);
+        entity.GetComponent<EntityManager>().manager = manager;
 
         // apply scale
         entity.transform.localScale = scale;

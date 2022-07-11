@@ -17,30 +17,6 @@ public class SetEntityCollideableInstruction : Instruction
 
         // tell entity manager to apply a mesh collider
         entity.GetComponent<EntityManager>().setCollideable(is_collideable);
-
-        /*// check if entity has a mesh collider
-        MeshCollider meshCollider = entity.GetComponent<MeshCollider>();
-
-        // if should be collideable, make sure they have a mesh collider that is setup
-        if (is_collideable && meshCollider == null)
-        {
-            meshCollider = entity.AddComponent<MeshCollider>();
-            MeshFilter filter = entity.GetComponent<MeshFilter>();
-            if (filter.mesh.vertexCount == 0)
-            {
-                foreach (MeshAssetManager.WaitingForMesh waiting in manager.assetPacketHandler.meshAssetManager.waitingForMesh)
-                {
-                    if (waiting.entityManager.meshFilter == filter)
-                        waiting.entityManager.collider = meshCollider;
-                }
-            }
-            else
-                meshCollider.sharedMesh = filter.mesh;
-        }
-        // otherwise, make sure they do not have a mesh collider
-        else if (!is_collideable && meshCollider != null)
-            manager.DestroyUnityObject(meshCollider);*/
-
     }
 }
 public class CreateParticleEmitterInstruction : Instruction
@@ -117,5 +93,41 @@ public class CreateLightInstruction : Instruction
         light.range = lightSize;
         light.spotAngle = lightSpotAngle;
         light.color = lightColor;
+    }
+}
+public class SetMeshInstruction : Instruction
+{
+    public override int getID() => 14;
+
+    public override void execute(Manager manager, byte[] data)
+    {
+        // unpack
+        int entity_id = BitConverter.ToInt32(data, 0);
+        int mesh_id = BitConverter.ToInt32(data, 4);
+
+        // try to get entity
+        if (!manager.entities.ContainsKey(entity_id)) return;
+        GameObject entity = manager.entities[entity_id];
+
+        // add mesh to entity manager
+        entity.GetComponent<EntityManager>().addMesh(mesh_id);
+    }
+}
+public class SetMaterialInstruction : Instruction
+{
+    public override int getID() => 15;
+
+    public override void execute(Manager manager, byte[] data)
+    {
+        // unpack
+        int entity_id = BitConverter.ToInt32(data, 0);
+        int material_id = BitConverter.ToInt32(data, 4);
+
+        // try to get entity
+        if (!manager.entities.ContainsKey(entity_id)) return;
+        GameObject entity = manager.entities[entity_id];
+
+        // add mesh to entity manager
+        entity.GetComponent<EntityManager>().addMaterial(material_id);
     }
 }
