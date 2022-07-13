@@ -410,8 +410,6 @@ MonoBehaviour:
     type: 3}
   baseParticle: {fileID: 7583678835589183905, guid: a8ef173eb519b83409bbe54ec2bd879a,
     type: 3}
-  baseLight: {fileID: 136119896070367418, guid: bb93c3bb58e5d7c469bbfb9624aa2111,
-    type: 3}
   shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   particleShader: {fileID: 211, guid: 0000000000000000f000000000000000, type: 0}
   usingHeadset: 0

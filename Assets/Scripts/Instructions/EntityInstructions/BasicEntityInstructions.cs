@@ -18,7 +18,9 @@ public class CreateEntityInstruction : Instruction
         manager.entities.Add(entity_id, entity);
 
         // update entity manager
-        entity.GetComponent<EntityManager>().manager = manager;
+        EntityManager entityManager = entity.GetComponent<EntityManager>();
+        entityManager.manager = manager;
+        entityManager.entityID = entity_id;
 
         // apply scale
         entity.transform.localScale = scale;

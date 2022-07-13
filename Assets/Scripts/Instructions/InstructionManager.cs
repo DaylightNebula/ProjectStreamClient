@@ -34,6 +34,8 @@ public class InstructionManager
     public LoadAssetInstruction loadAssetInstruction = new LoadAssetInstruction();
     public SetMeshInstruction setMeshInstruction = new SetMeshInstruction();
     public SetMaterialInstruction setMaterialInstruction = new SetMaterialInstruction();
+    public SetRigidbodyInstruction setRigidbodyInstruction = new SetRigidbodyInstruction();
+    public ApplyForceToRigidbodyInstruction applyForceToRigidbodyInstruction = new ApplyForceToRigidbodyInstruction();
 
     public InstructionManager(Manager manager)
     {
@@ -109,6 +111,7 @@ public class InstructionManager
     public void ExecuteInstruction(InstructionData inData)
     {
         // execute instruction
+        if (inData.instructionID != 3) Debug.Log("Attempting to execute instruction with id " + inData.instructionID);
         if (!Instruction.instructions.ContainsKey(inData.instructionID))
         {
             Debug.LogWarning("Instruction with ID" + inData.instructionID + " does not exist!");

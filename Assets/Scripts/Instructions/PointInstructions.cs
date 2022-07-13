@@ -72,7 +72,7 @@ public class MoveEntityToPointInstruction : Instruction
         // if neither entities or point maps have keys, throw error and break
         if (!manager.entities.ContainsKey(entity_id) || !manager.DoesPointExist(point_id))
         {
-            Debug.LogError("Either point " + point_id + " or entity " + entity_id + " does not exist!");
+            Debug.LogWarning("Either point " + point_id + " or entity " + entity_id + " does not exist!");
             return;
         }
 

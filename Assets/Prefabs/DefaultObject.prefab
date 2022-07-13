@@ -44,7 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 034415952c99a2548af22dda08ab9866, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  manager: {fileID: 0}
   meshID: -1
   materialID: -1
   meshFilter: {fileID: 0}
   meshRenderer: {fileID: 0}
+  collider: {fileID: 0}
+  rigidbody: {fileID: 0}

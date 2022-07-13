@@ -26,19 +26,22 @@ public class CreateParticleEmitterInstruction : Instruction
     public override void execute(Manager manager, byte[] data)
     {
         // unpack
-        int texture_id = BitConverter.ToInt32(data, 0);
-        Vector3 emitter_position = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
-        float emitter_lifetime_seconds = BitConverter.ToSingle(data, 16);
-        float particles_rate = BitConverter.ToSingle(data, 20);
-        float particle_duration = BitConverter.ToSingle(data, 24);
-        float particle_speed = BitConverter.ToSingle(data, 28);
-        Vector3 particle_direction_scale = new Vector3(BitConverter.ToSingle(data, 32), BitConverter.ToSingle(data, 36), BitConverter.ToSingle(data, 40));
-        float particle_size = BitConverter.ToSingle(data, 44);
+        int entity_id = BitConverter.ToInt32(data, 0);
+        int texture_id = BitConverter.ToInt32(data, 4);
+        float emitter_lifetime_seconds = BitConverter.ToSingle(data, 8);
+        float particles_rate = BitConverter.ToSingle(data, 12);
+        float particle_duration = BitConverter.ToSingle(data, 16);
+        float particle_speed = BitConverter.ToSingle(data, 20);
+        Vector3 particle_direction_scale = new Vector3(BitConverter.ToSingle(data, 24), BitConverter.ToSingle(data, 28), BitConverter.ToSingle(data, 32));
+        float particle_size = BitConverter.ToSingle(data, 36);
+
+        // try to get entity
+        if (!manager.entities.ContainsKey(entity_id)) return;
+        GameObject entity = manager.entities[entity_id];
 
         // create object and get components
-        GameObject emitter = GameObject.Instantiate(manager.baseParticle, emitter_position, Quaternion.identity);
-        ParticleSystem particleSystem = emitter.GetComponent<ParticleSystem>();
-        DestroyAfterTime destroyer = emitter.GetComponent<DestroyAfterTime>();
+        ParticleSystem particleSystem = entity.AddComponent<ParticleSystem>();
+        DestroyAfterTime destroyer = entity.AddComponent<DestroyAfterTime>();
 
         // set kill time
         destroyer.destroySeconds = emitter_lifetime_seconds;
@@ -53,7 +56,7 @@ public class CreateParticleEmitterInstruction : Instruction
         shape.scale = particle_direction_scale;
 
         // set particle texture
-        manager.assetPacketHandler.textureAssetManager.setTexture(manager, emitter.GetComponent<ParticleSystemRenderer>(), texture_id);
+        manager.assetPacketHandler.textureAssetManager.setTexture(manager, entity.AddComponent<ParticleSystemRenderer>(), texture_id);
     }
 }
 public class CreateLightInstruction : Instruction
@@ -63,17 +66,19 @@ public class CreateLightInstruction : Instruction
     public override void execute(Manager manager, byte[] data)
     {
         // unpack
-        Vector3 lightPosition = new Vector3(BitConverter.ToSingle(data, 0), BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8));
-        Vector3 lightRotation = new Vector3(BitConverter.ToSingle(data, 12), BitConverter.ToSingle(data, 16), BitConverter.ToSingle(data, 20));
-        byte lightType = data[24];
-        float lightIntensity = BitConverter.ToSingle(data, 25);
-        float lightSize = BitConverter.ToSingle(data, 29);
-        float lightSpotAngle = BitConverter.ToSingle(data, 33);
-        Color lightColor = new Color(((float)data[37]) / 255f, ((float)data[38]) / 255f, ((float)data[39]) / 255f);
+        int entity_id = BitConverter.ToInt32(data, 0);
+        byte lightType = data[4];
+        float lightIntensity = BitConverter.ToSingle(data, 5);
+        float lightSize = BitConverter.ToSingle(data, 9);
+        float lightSpotAngle = BitConverter.ToSingle(data, 13);
+        Color lightColor = new Color(((float)data[17]) / 255f, ((float)data[18]) / 255f, ((float)data[19]) / 255f);
 
-        // create new light
-        GameObject lightObject = GameObject.Instantiate(manager.baseLight, lightPosition, Quaternion.Euler(lightRotation));
-        Light light = lightObject.GetComponent<Light>();
+        // try to get entity
+        if (!manager.entities.ContainsKey(entity_id)) return;
+        GameObject entity = manager.entities[entity_id];
+
+        // create new light on entity
+        Light light = entity.AddComponent<Light>();
 
         // update light type
         if (lightType == 0x00)
@@ -129,5 +134,47 @@ public class SetMaterialInstruction : Instruction
 
         // add mesh to entity manager
         entity.GetComponent<EntityManager>().addMaterial(material_id);
+    }
+}
+public class SetRigidbodyInstruction : Instruction
+{
+    public override int getID() => 16;
+
+    public override void execute(Manager manager, byte[] data)
+    {
+        // unpack
+        int entity_id = BitConverter.ToInt32(data, 0);
+        bool use_rigidbody = data[4] == 1;
+        float rb_mass = BitConverter.ToSingle(data, 5);
+        float rb_drag = BitConverter.ToSingle(data, 9);
+        float rb_angular_drag = BitConverter.ToSingle(data, 13);
+        bool rb_use_gravity = data[17] == 1;
+        bool rb_is_kinematic = data[18] == 1;
+
+        // try to get entity
+        if (!manager.entities.ContainsKey(entity_id)) return;
+        GameObject entity = manager.entities[entity_id];
+
+        // set rigidbody
+        entity.GetComponent<EntityManager>().setRigidbody(use_rigidbody, rb_mass, rb_drag, rb_angular_drag, rb_use_gravity, rb_is_kinematic);
+    }
+}
+public class ApplyForceToRigidbodyInstruction : Instruction
+{
+    public override int getID() => 17;
+
+    public override void execute(Manager manager, byte[] data)
+    {
+        // unpack
+        int entity_id = BitConverter.ToInt32(data, 0);
+        Vector3 force = new Vector3(BitConverter.ToSingle(data, 4), BitConverter.ToSingle(data, 8), BitConverter.ToSingle(data, 12));
+
+        // try to get entity
+        if (!manager.entities.ContainsKey(entity_id)) return;
+        GameObject entity = manager.entities[entity_id];
+
+        // try to apply force to the entities rigid body
+        EntityManager entityManager = entity.GetComponent<EntityManager>();
+        if (entityManager.rigidbody != null) entityManager.rigidbody.AddForce(force, ForceMode.Impulse);
     }
 }

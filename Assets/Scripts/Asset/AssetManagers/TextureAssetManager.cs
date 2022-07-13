@@ -106,7 +106,10 @@ public class TextureAssetManager : AssetManager
                 mat.SetTexture("_DetailMask", texture);
                 break;
             case 7:
+                mat.EnableKeyword("_EMISSION");
                 mat.SetTexture("_EmissionMap", texture);
+                mat.SetColor("_EmissionColor", Color.white);
+                mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
                 break;
             default:
                 Debug.LogError("Could not apply texture with typeID " + typeID);
