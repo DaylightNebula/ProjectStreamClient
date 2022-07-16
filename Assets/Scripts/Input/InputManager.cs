@@ -7,11 +7,11 @@ using UnityEngine.XR;
 public class InputManager
 {
     Manager manager;
-    InstructionManager instructionManager;
-    public InputManager(Manager manager, InstructionManager instructionManager)
+    /*InstructionManager instructionManager;*/
+    public InputManager(Manager manager/*, InstructionManager instructionManager*/)
     {
         // setup vars
-        this.manager = manager;
+        /*this.manager = manager;
         this.instructionManager = instructionManager;
 
         // setup callback functions
@@ -46,10 +46,10 @@ public class InputManager
         manager.lJoyPress.Enable();
         manager.rTriggerPress.Enable();
         manager.rGripPress.Enable();
-        manager.rJoyPress.Enable();
+        manager.rJoyPress.Enable();*/
     }
 
-    private void aButtonPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.A_BUTTON); manager.SendButtonPress(6); }
+    /*private void aButtonPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.A_BUTTON); manager.SendButtonPress(6); }
     private void bButtonPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.B_BUTTON); manager.SendButtonPress(7); }
     private void xButtonPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.X_BUTTON); manager.SendButtonPress(8); }
     private void yButtonPressed(InputAction.CallbackContext callbackContext) { instructionManager.buttonPressed(InstructionButton.Y_BUTTON); manager.SendButtonPress(9); }
@@ -69,5 +69,5 @@ public class InputManager
     private void lJoyReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.L_JOYSTICK); manager.SendButtonRelease(4); }
     private void rTriggerReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_TRIGGER); manager.SendButtonRelease(1); }
     private void rGripReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_GRIP); manager.SendButtonRelease(3); }
-    private void rJoyReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_JOYSTICK); manager.SendButtonRelease(5); }
+    private void rJoyReleased(InputAction.CallbackContext callbackContext) { instructionManager.buttonReleased(InstructionButton.R_JOYSTICK); manager.SendButtonRelease(5); }*/
 }

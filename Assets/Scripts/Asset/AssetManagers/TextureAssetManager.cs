@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class TextureAssetManager : AssetManager
@@ -7,27 +8,44 @@ public class TextureAssetManager : AssetManager
 
     List<WaitingForTexture> waitingForTextureList = new List<WaitingForTexture>();
     List<WaitingForParticleTexture> waitingForParticleTextureList = new List<WaitingForParticleTexture>();
-    List<int> requestedTextures = new List<int>();
+    List<string> requestedTextures = new List<string>();
 
     public override int getAssetID() => 2;
     public override int getPacketID() => 4;
 
-    public override void Request(Manager manager, int id)
+    public override void Request(Manager manager, string id)
     {
-        // make sure we are not already requesting a texture
+        // if we have the requested sound, return
         if (requestedTextures.Contains(id)) return;
 
-        // request the texture from the asset server and update the requesting list
-        manager.assetClient.sendPacket(0x03, BitConverter.GetBytes(id));
+        // build request packet
+        byte[] idBytes = BitConverter.GetBytes(id.Length);
+        byte[] idStringBytes = Encoding.UTF8.GetBytes(id);
+        byte[] packet = new byte[4 + id.Length];
+        Buffer.BlockCopy(idBytes, 0, packet, 0, 4);
+        Buffer.BlockCopy(idStringBytes, 0, packet, 4, idStringBytes.Length);
+
+        // call request packet
+        manager.assetClient.sendPacket(
+            0x03,
+            packet
+        );
+
+        // add id to requested sounds
         requestedTextures.Add(id);
     }
 
     public override void ProcessData(Manager manager, byte[] data)
     {
         // unpack packet header
-        int id = BitConverter.ToInt32(data, 0);
+        int id_length = BitConverter.ToInt32(data, 0);
+        byte[] id_bytes = new byte[id_length];
+        Buffer.BlockCopy(data, 4, id_bytes, 0, id_length);
+        string id = Encoding.UTF8.GetString(id_bytes);
+
+        // remove starting data
         Array.Reverse(data);
-        Array.Resize(ref data, data.Length - 4);
+        Array.Resize(ref data, data.Length - (id_length + 4));
         Array.Reverse(data);
 
         // get texture
@@ -132,7 +150,7 @@ public class TextureAssetManager : AssetManager
         particle.material = material;
     }
 
-    public void setTexture(Manager manager, Material mat, int textureID, int typeID)
+    public void setTexture(Manager manager, Material mat, string textureID, int typeID)
     {
         if (manager.textures.ContainsKey(textureID))
         {
@@ -148,7 +166,7 @@ public class TextureAssetManager : AssetManager
         }
     }
 
-    public void setTexture(Manager manager, ParticleSystemRenderer particle, int textureID)
+    public void setTexture(Manager manager, ParticleSystemRenderer particle, string textureID)
     {
         if (manager.textures.ContainsKey(textureID))
         {
@@ -167,12 +185,12 @@ public class TextureAssetManager : AssetManager
     class WaitingForTexture
     {
         public Material mat;
-        public int textureID;
+        public string textureID;
         public int typeID;
 
         public bool shouldRemove = false;
 
-        public WaitingForTexture(Material mat, int textureID, int typeID)
+        public WaitingForTexture(Material mat, string textureID, int typeID)
         {
             this.mat = mat;
             this.textureID = textureID;
@@ -182,11 +200,11 @@ public class TextureAssetManager : AssetManager
     class WaitingForParticleTexture
     {
         public ParticleSystemRenderer particle;
-        public int textureID;
+        public string textureID;
 
         public bool shouldRemove = false;
 
-        public WaitingForParticleTexture(ParticleSystemRenderer particle, int textureID)
+        public WaitingForParticleTexture(ParticleSystemRenderer particle, string textureID)
         {
             this.particle = particle;
             this.textureID = textureID;

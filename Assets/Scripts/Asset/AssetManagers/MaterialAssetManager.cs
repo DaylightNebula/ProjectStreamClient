@@ -1,29 +1,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class MaterialAssetManager : AssetManager
 {
     List<WaitingForMaterial> waitingForMaterialList = new List<WaitingForMaterial>();
-    public List<int> requestedMaterials = new List<int>();
+    public List<string> requestedMaterials = new List<string>();
 
     public override int getAssetID() => 1;
     public override int getPacketID() => 2;
 
+    int counter = 0;
     public override void ProcessData(Manager manager, byte[] data)
     {
-        // unpack packet
-        int id = BitConverter.ToInt32(data, 0);
-        int albedo_texture_id = BitConverter.ToInt32(data, 4);
-        int metallic_texture_id = BitConverter.ToInt32(data, 8);
-        float metallic_strength = data[12] / 255f;
-        float smoothness = data[13] / 255f;
-        int normal_texture_id = BitConverter.ToInt32(data, 14);
-        int height_texture_id = BitConverter.ToInt32(data, 18);
-        int occlusion_texture_id = BitConverter.ToInt32(data, 22);
-        int detail_texture_id = BitConverter.ToInt32(data, 26);
-        int emission_texture_id = BitConverter.ToInt32(data, 30);
+        counter = 0;
+        // unpack header
+        string id = readStringFromByteArray(data);
+
+        // unpack rest of packet
+        string albedo_texture_id = readStringFromByteArray(data);
+        string metallic_texture_id = readStringFromByteArray(data);
+        float metallic_strength = data[counter] / 255f;
+        float smoothness = data[counter + 1] / 255f;
+        counter += 2;
+        string normal_texture_id = readStringFromByteArray(data);
+        string height_texture_id = readStringFromByteArray(data);
+        string occlusion_texture_id = readStringFromByteArray(data);
+        string detail_texture_id = readStringFromByteArray(data);
+        string emission_texture_id = readStringFromByteArray(data);
 
         // create material
         Material mat = new Material(manager.shader);
@@ -36,12 +42,12 @@ public class MaterialAssetManager : AssetManager
         // set materials
         TextureAssetManager textureManager = manager.assetPacketHandler.textureAssetManager;
         textureManager.setTexture(manager, mat, albedo_texture_id, ((int)TextureType.ALBEDO));
-        if (metallic_texture_id != -1) textureManager.setTexture(manager, mat, metallic_texture_id, ((int)TextureType.METALLIC));
-        if (normal_texture_id != -1) textureManager.setTexture(manager, mat, normal_texture_id, ((int)TextureType.NORMAL_MAP));
-        if (height_texture_id != -1) textureManager.setTexture(manager, mat, height_texture_id, ((int)TextureType.HEIGHT_MAP));
-        if (occlusion_texture_id != -1) textureManager.setTexture(manager, mat, occlusion_texture_id, ((int)TextureType.OCCLUSION));
-        if (detail_texture_id != -1) textureManager.setTexture(manager, mat, detail_texture_id, ((int)TextureType.DETAIL_MAP));
-        if (emission_texture_id != -1) textureManager.setTexture(manager, mat, emission_texture_id, ((int)TextureType.EMISSION_MAP));
+        if (metallic_texture_id != "") textureManager.setTexture(manager, mat, metallic_texture_id, ((int)TextureType.METALLIC));
+        if (normal_texture_id != "") textureManager.setTexture(manager, mat, normal_texture_id, ((int)TextureType.NORMAL_MAP));
+        if (height_texture_id != "") textureManager.setTexture(manager, mat, height_texture_id, ((int)TextureType.HEIGHT_MAP));
+        if (occlusion_texture_id != "") textureManager.setTexture(manager, mat, occlusion_texture_id, ((int)TextureType.OCCLUSION));
+        if (detail_texture_id != "") textureManager.setTexture(manager, mat, detail_texture_id, ((int)TextureType.DETAIL_MAP));
+        if (emission_texture_id != "") textureManager.setTexture(manager, mat, emission_texture_id, ((int)TextureType.EMISSION_MAP));
 
         if (requestedMaterials.Contains(id)) requestedMaterials.Remove(id);
 
@@ -60,6 +66,21 @@ public class MaterialAssetManager : AssetManager
         }
     }
 
+    private string readStringFromByteArray(byte[] bytes)
+    {
+        // get length, if it is 0, return a blank string
+        int length = BitConverter.ToInt32(bytes, counter);
+        if (length == 0) return "";
+
+        // get string bytes from data
+        byte[] string_bytes = new byte[length];
+        Buffer.BlockCopy(bytes, counter + 4, string_bytes, 0, length);
+
+        // update counter and return string bytes converted to a string
+        counter += 4 + length;
+        return Encoding.UTF8.GetString(string_bytes);
+    }
+
     private bool shouldRemove(WaitingForMaterial waiting)
     {
         return waiting.shouldRemove;
@@ -67,35 +88,50 @@ public class MaterialAssetManager : AssetManager
 
     public void setMaterial(Manager manager, EntityManager entityManager)
     {
-        if (manager.materials.ContainsKey(entityManager.materialID))
+        if (manager.materials.ContainsKey(entityManager.material))
         {
-            entityManager.meshRenderer.material = manager.materials[entityManager.materialID];
+            entityManager.meshRenderer.material = manager.materials[entityManager.material];
         }
         else
         {
             lock (waitingForMaterialList)
             {
-                waitingForMaterialList.Add(new WaitingForMaterial(entityManager, entityManager.materialID));
+                waitingForMaterialList.Add(new WaitingForMaterial(entityManager, entityManager.material));
             }
-            Request(manager, entityManager.materialID);
+            Request(manager, entityManager.material);
         }
     }
 
-    public override void Request(Manager manager, int id)
+    public override void Request(Manager manager, string id)
     {
+        // if we have the requested sound, return
         if (requestedMaterials.Contains(id)) return;
-        manager.assetClient.sendPacket(0x01, BitConverter.GetBytes(id));
+
+        // build request packet
+        byte[] idBytes = BitConverter.GetBytes(id.Length);
+        byte[] idStringBytes = Encoding.UTF8.GetBytes(id);
+        byte[] packet = new byte[4 + id.Length];
+        Buffer.BlockCopy(idBytes, 0, packet, 0, 4);
+        Buffer.BlockCopy(idStringBytes, 0, packet, 4, idStringBytes.Length);
+
+        // call request packet
+        manager.assetClient.sendPacket(
+            0x01,
+            packet
+        );
+
+        // add id to requested sounds
         requestedMaterials.Add(id);
     }
 
     class WaitingForMaterial
     {
         public EntityManager entityManager;
-        public int materialID;
+        public string materialID;
 
         public bool shouldRemove = false;
 
-        public WaitingForMaterial(EntityManager entityManager, int materialID)
+        public WaitingForMaterial(EntityManager entityManager, string materialID)
         {
             this.entityManager = entityManager;
             this.materialID = materialID;

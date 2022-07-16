@@ -17,7 +17,6 @@ public class Manager : MonoBehaviour
     public BehaviorClient behaviorClient;
     public BehaviorPacketHandler behaviorPacketHandler;
 
-    public InstructionManager instructionManager;
     public InputManager inputManager;
 
     public GameObject hmd;
@@ -34,11 +33,11 @@ public class Manager : MonoBehaviour
     public GameObject baseParticle;
     public Shader shader;
     public Shader particleShader;
-    public Dictionary<int, Texture2D> textures = new Dictionary<int, Texture2D>();
-    public Dictionary<int, Material> materials = new Dictionary<int, Material>();
-    public Dictionary<int, Mesh> meshes = new Dictionary<int, Mesh>();
-    public Dictionary<int, GameObject> entities = new Dictionary<int, GameObject>();
-    private Dictionary<int, KeyValuePair<Vector3, Vector3>> points = new Dictionary<int, KeyValuePair<Vector3, Vector3>>();
+    public Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
+    public Dictionary<string, Material> materials = new Dictionary<string, Material>();
+    public Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
+    public Dictionary<string, GameObject> entities = new Dictionary<string, GameObject>();
+    private Dictionary<string, KeyValuePair<Vector3, Vector3>> points = new Dictionary<string, KeyValuePair<Vector3, Vector3>>();
 
     public bool usingHeadset = true;
     DesktopMouseLook mouseLook;
@@ -57,10 +56,10 @@ public class Manager : MonoBehaviour
     void Awake()
     {
         // create instruction manager
-        instructionManager = new InstructionManager(this);
+        //instructionManager = new InstructionManager(this);
 
         // create input manager
-        inputManager = new InputManager(this, instructionManager);
+        inputManager = new InputManager(this);
 
         // create behavior server connections
         behaviorPacketHandler = new BehaviorPacketHandler(this);
@@ -69,16 +68,16 @@ public class Manager : MonoBehaviour
         behaviorClient.start(behaviorAddress, behaviorPort);
     }
 
-    public void makeMeshExist(int meshID)
+    public void makeMeshExist(string mesh)
     {
-        if (!meshes.ContainsKey(meshID) && !assetPacketHandler.meshAssetManager.requestedMesh.Contains(meshID))
-            assetPacketHandler.meshAssetManager.Request(this, meshID);
+        if (!meshes.ContainsKey(mesh) && !assetPacketHandler.meshAssetManager.requestedMesh.Contains(mesh))
+            assetPacketHandler.meshAssetManager.Request(this, mesh);
     }
 
-    public void makeMaterialExist(int materialID)
+    public void makeMaterialExist(string material)
     {
-        if (!meshes.ContainsKey(materialID) && !assetPacketHandler.materialAssetManager.requestedMaterials.Contains(materialID))
-            assetPacketHandler.materialAssetManager.Request(this, materialID);
+        if (!meshes.ContainsKey(material) && !assetPacketHandler.materialAssetManager.requestedMaterials.Contains(material))
+            assetPacketHandler.materialAssetManager.Request(this, material);
     }
 
     public void setMaterial(EntityManager entityManager)
@@ -98,16 +97,10 @@ public class Manager : MonoBehaviour
         assetClient = new AssetClient(assetPacketHandler);
         assetPacketHandler.setClient(assetClient);
         assetClient.start(address, port);
-
-        // tell instruction manager the asset server is connected
-        instructionManager.assetServerConnected();
     }
 
     void Start()
     {
-        // set last positions for tracked devices deltas
-        UpdateLastPositionsOfTrackedDevices();
-
         // if not using headset, initialize mouse look
         if (!usingHeadset)
         {
@@ -134,69 +127,25 @@ public class Manager : MonoBehaviour
         // update server connections
         if (behaviorClient != null) behaviorClient.update();
         if (assetClient != null) assetClient.update();
-
-        // update instruction manager
-        if (instructionManager != null) instructionManager.currentlyRunning();
-
-        // update tracked positions of tracked devices
-        SendPositionDataForTrackedDevice(0x02, hmd.transform.position, hmd.transform.rotation.eulerAngles, hmdLastPosition, hmdLastRotation);
-        SendPositionDataForTrackedDevice(0x00, leftController.transform.position, leftController.transform.rotation.eulerAngles, lControllerLastPosition, lControllerLastRotation);
-        SendPositionDataForTrackedDevice(0x01, rightController.transform.position, rightController.transform.rotation.eulerAngles, rControllerLastPosition, rControllerLastRotation);
-
-        // update last positions for deltas
-        UpdateLastPositionsOfTrackedDevices();
     }
 
-    private void SendPositionDataForTrackedDevice(byte id, Vector3 currentPosition, Vector3 currentRotation, Vector3 lastPosition, Vector3 lastRotation)
+    public void UpdatePointLocation(string point, Vector3 position, Vector3 rotation)
     {
-        // make sure behavior client exists
-        if (behaviorClient == null) return;
-
-        // get deltas
-        Vector3 positionDelta = currentPosition - lastPosition;
-        Vector3 rotationDelta = currentRotation - lastRotation;
-
-        // build float array
-        float[] floats = new float[12];
-        floats[0] = currentPosition.x;
-        floats[1] = currentPosition.y;
-        floats[2] = currentPosition.z;
-        floats[3] = currentRotation.x;
-        floats[4] = currentRotation.y;
-        floats[5] = currentRotation.z;
-        floats[6] = positionDelta.x;
-        floats[7] = positionDelta.y;
-        floats[8] = positionDelta.z;
-        floats[9] = rotationDelta.x;
-        floats[10] = rotationDelta.y;
-        floats[11] = rotationDelta.z;
-
-        // build packet
-        byte[] data = new byte[49];
-        data[0] = id;
-        Buffer.BlockCopy(floats, 0, data, 1, 48);
-
-        // send packet
-        behaviorClient.sendPacket(3, data);
+        points[point] = new KeyValuePair<Vector3, Vector3>(position, rotation);
+        //SendPointUpdateLocation(point, position, rotation);
     }
 
-    public void UpdatePointLocation(int pointID, Vector3 position, Vector3 rotation)
+    public KeyValuePair<Vector3, Vector3> GetPointLocation(string point)
     {
-        points[pointID] = new KeyValuePair<Vector3, Vector3>(position, rotation);
-        SendPointUpdateLocation(pointID, position, rotation);
+        return points[point];
     }
 
-    public KeyValuePair<Vector3, Vector3> GetPointLocation(int pointID)
+    public bool DoesPointExist(string point)
     {
-        return points[pointID];
+        return points.ContainsKey(point);
     }
 
-    public bool DoesPointExist(int pointID)
-    {
-        return points.ContainsKey(pointID);
-    }
-
-    private void SendPointUpdateLocation(int pointID, Vector3 position, Vector3 rotation)
+    /*private void SendPointUpdateLocation(string point, Vector3 position, Vector3 rotation)
     {
         // make sure behavior client exists
         if (behaviorClient == null) return;
@@ -221,17 +170,7 @@ public class Manager : MonoBehaviour
 
         // send packet
         behaviorClient.sendPacket(7, data);
-    }
-
-    private void UpdateLastPositionsOfTrackedDevices()
-    {
-        hmdLastPosition = hmd.transform.position;
-        hmdLastRotation = hmd.transform.rotation.eulerAngles;
-        lControllerLastPosition = leftController.transform.position;
-        lControllerLastRotation = leftController.transform.rotation.eulerAngles;
-        rControllerLastPosition = rightController.transform.position;
-        rControllerLastRotation = rightController.transform.rotation.eulerAngles;
-    }
+    }*/
 
     public void SendButtonPress(byte buttonID)
     {

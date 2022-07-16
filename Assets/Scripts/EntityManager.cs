@@ -5,13 +5,14 @@ public class EntityManager : MonoBehaviour
 {
     public Manager manager;
 
-    public int entityID;
-    public int meshID = -1;
-    public int materialID = -1;
+    public string name;
+    public string mesh;
+    public string material;
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
     public MeshCollider collider;
     public Rigidbody rigidbody;
+    public Light light;
 
     Vector3 position;
     Quaternion rotation;
@@ -41,7 +42,7 @@ public class EntityManager : MonoBehaviour
 
     void sendEntityTransformUpdate()
     {
-        // update tracking variables
+        /*// update tracking variables
         position = transform.position;
         rotation = transform.rotation;
         scale = transform.localScale;
@@ -71,23 +72,24 @@ public class EntityManager : MonoBehaviour
         if (isActive) data[40] = 1; else data[40] = 0;
 
         // send update packet to client
-        manager.behaviorClient.sendPacket(0x08, data);
+        manager.behaviorClient.sendPacket(0x08, data);*/
     }
 
-    public void addMesh(int id)
+    public void addMesh(string mesh)
     {
+        Debug.Log("Mesh " + mesh);
         // update ID and make sure everything needed for display exists
-        meshID = id;
+        this.mesh = mesh;
         addMeshFilterAndRenderer();
 
         // apply mesh
         manager.setMesh(this);
     }
 
-    public void addMaterial(int id)
+    public void addMaterial(string material)
     {
         // update ID and make sure everything needed for display exists
-        materialID = id;
+        this.material = material;
         addMeshFilterAndRenderer();
 
         // apply material
@@ -115,8 +117,8 @@ public class EntityManager : MonoBehaviour
             collider = gameObject.AddComponent<MeshCollider>();
 
         // if mesh with meshID exists, apply it right now
-        if (manager.meshes.ContainsKey(meshID))
-            collider.sharedMesh = manager.meshes[meshID];
+        if (meshFilter != null && meshRenderer != null && manager.meshes.ContainsKey(mesh))
+            collider.sharedMesh = manager.meshes[mesh];
     }
 
     private void removeCollideable()
@@ -151,5 +153,31 @@ public class EntityManager : MonoBehaviour
             Destroy(rigidbody);
             rigidbody = null;
         }
+    }
+
+    public void setLight(string type, float intensity, float size, float angle, Color color)
+    {
+        // make sure we have a light
+        if (light == null)
+            light = gameObject.AddComponent<Light>();
+
+        // update light type
+        if (type == "directional")
+            light.type = LightType.Directional;
+        else if (type == "spot")
+            light.type = LightType.Spot;
+        else if (type == "point")
+            light.type = LightType.Point;
+        else
+        {
+            Debug.LogError("Unknown light type " + type);
+            return;
+        }
+
+        // update light component
+        light.intensity = intensity;
+        light.range = size;
+        light.spotAngle = angle;
+        light.color = color;
     }
 }

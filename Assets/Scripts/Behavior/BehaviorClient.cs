@@ -127,10 +127,10 @@ public class BehaviorClient
                 {
                     packetHandler.processPacket(packet.packetID, packet.data);
                 }
-            }
 
-            // clear packet list
-            packets.Clear();
+                // clear packet list
+                packets.Clear();
+            }
         }
     }
 

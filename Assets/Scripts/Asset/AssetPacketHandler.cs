@@ -65,7 +65,7 @@ public class AssetPacketHandler
         }
     }
 
-    public void setTexture(Material mat, int textureID, int typeID){ textureAssetManager.setTexture(manager, mat, textureID, typeID); }
+    public void setTexture(Material mat, string textureID, int typeID){ textureAssetManager.setTexture(manager, mat, textureID, typeID); }
     public void setMaterial(EntityManager entityManager) { materialAssetManager.setMaterial(manager, entityManager); }
     public void setMesh(EntityManager entityManager) { meshAssetManager.setMesh(manager, entityManager); }
 }

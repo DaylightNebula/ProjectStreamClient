@@ -1,41 +1,45 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class SoundAssetManager : AssetManager
 {
-    public Dictionary<int, AudioClip> sounds = new Dictionary<int, AudioClip>();
+    public Dictionary<string, AudioClip> sounds = new Dictionary<string, AudioClip>();
 
     List<WaitingForSound> waitingForSounds = new List<WaitingForSound>();
     List<WaitingForSoundWithTime> waitingForTimedSounds = new List<WaitingForSoundWithTime>();
-    public List<int> requestedSounds = new List<int>();
+    public List<string> requestedSounds = new List<string>();
 
     public override int getAssetID() => 3;
     public override int getPacketID() => 8;
 
     public override void ProcessData(Manager manager, byte[] data)
     {
-        Debug.Log("Processing data for sound with " + data.Length + " size");
+        // unpack id
+        int sound_id_length = BitConverter.ToInt32(data, 0);
+        byte[] sound_id_bytes = new byte[sound_id_length];
+        Buffer.BlockCopy(data, 4, sound_id_bytes, 0, sound_id_length);
+        string sound_id = Encoding.UTF8.GetString(sound_id_bytes);
 
-        // unpack
-        int sound_id = BitConverter.ToInt32(data, 0);
-        int channels = BitConverter.ToInt32(data, 4);
-        int sample_rate = BitConverter.ToInt32(data, 8);
-        int sample_count = BitConverter.ToInt32(data, 12);
+        // unpack other data
+        int byteCounter = 4 + sound_id_length;
+        int channels = BitConverter.ToInt32(data, byteCounter);
+        int sample_rate = BitConverter.ToInt32(data, byteCounter + 4);
+        int sample_count = BitConverter.ToInt32(data, byteCounter + 8);
+        byteCounter += 12;
 
         // create audio clip
-        AudioClip clip = AudioClip.Create(sound_id.ToString(), sample_count, channels, sample_rate, false);
+        AudioClip clip = AudioClip.Create(sound_id, sample_count, channels, sample_rate, false);
 
         // create float array for samples from data
         float[] samples = new float[sample_count];
         for (int i = 0; i < sample_count; i++)
-            samples[i] = BitConverter.ToSingle(data, (i * 4) + 16);
+            samples[i] = BitConverter.ToSingle(data, (i * 4) + byteCounter);
 
         // set audio clip data and save audio clip
         clip.SetData(samples, 0);
         sounds.Add(sound_id, clip);
-
-        Debug.Log("Created sound " + sound_id + " with " + samples.Length + " samples!");
 
         // play sounds for all those waiting
         lock(waitingForSounds)
@@ -59,14 +63,12 @@ public class SoundAssetManager : AssetManager
                     if (waiting.source != null)
                     {
                         float seconds_since_request = Time.realtimeSinceStartup - waiting.startTime;
-                        Debug.Log("Time since request " + seconds_since_request);
                         if (seconds_since_request < clip.length)
                         {
                             waiting.source.clip = clip;
                             waiting.source.volume = waiting.volume;
                             waiting.source.time = seconds_since_request;
                             waiting.source.Play();
-                            Debug.Log("Source time " + waiting.source.time);
                         }
                     }
                     waiting.shouldRemove = true;
@@ -88,14 +90,29 @@ public class SoundAssetManager : AssetManager
         return waiting.shouldRemove;
     }
 
-    public override void Request(Manager manager, int id)
+    public override void Request(Manager manager, string id)
     {
+        // if we have the requested sound, return
         if (requestedSounds.Contains(id)) return;
-        manager.assetClient.sendPacket(0x07, BitConverter.GetBytes(id));
+
+        // build request packet
+        byte[] idBytes = BitConverter.GetBytes(id.Length);
+        byte[] idStringBytes = Encoding.UTF8.GetBytes(id);
+        byte[] packet = new byte[4 + id.Length];
+        Buffer.BlockCopy(idBytes, 0, packet, 0, 4);
+        Buffer.BlockCopy(idStringBytes, 0, packet, 4, idStringBytes.Length);
+
+        // call request packet
+        manager.assetClient.sendPacket(
+            0x07, 
+            packet
+        );
+
+        // add id to requested sounds
         requestedSounds.Add(id);
     }
 
-    public void playSoundFromObject(Manager manager, GameObject gameObject, int id, float volume, bool waitForDownload)
+    public void playSoundFromObject(Manager manager, GameObject gameObject, string id, float volume, bool waitForDownload)
     {
         // get audio source
         AudioSource source = gameObject.GetComponent<AudioSource>();
@@ -126,12 +143,12 @@ public class SoundAssetManager : AssetManager
     class WaitingForSound
     {
         public AudioSource source;
-        public int soundID;
+        public string soundID;
         public float volume;
 
         public bool shouldRemove = false;
 
-        public WaitingForSound(AudioSource source, int soundID, float volume)
+        public WaitingForSound(AudioSource source, string soundID, float volume)
         {
             this.source = source;
             this.soundID = soundID;
@@ -142,13 +159,13 @@ public class SoundAssetManager : AssetManager
     class WaitingForSoundWithTime
     {
         public AudioSource source;
-        public int soundID;
+        public string soundID;
         public float volume;
         public float startTime;
 
         public bool shouldRemove = false;
 
-        public WaitingForSoundWithTime(AudioSource source, int soundID, float volume, float startTime)
+        public WaitingForSoundWithTime(AudioSource source, string soundID, float volume, float startTime)
         {
             this.source = source;
             this.soundID = soundID;
