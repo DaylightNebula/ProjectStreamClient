@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -59,10 +60,10 @@ public class BehaviorClient
             // receive callback
             socket.OnMessage += (bytes) =>
             {
-                int packetID = BitConverter.ToInt32(bytes, 0);
-                int packetLength = BitConverter.ToInt32(bytes, 0);
+                byte packetID = bytes[0];
+                int packetLength = BitConverter.ToInt32(bytes, 1);
                 byte[] data = new byte[packetLength];
-                Buffer.BlockCopy(bytes, 8, data, 0, packetLength);
+                Buffer.BlockCopy(bytes, 5, data, 0, packetLength);
 
                 // save packet list
                 lock (packets)
@@ -77,39 +78,33 @@ public class BehaviorClient
             };
 
             await socket.Connect();
-
-            // send hello packet
-            sendPacket(
-                0x00, new byte[0]
-            );
         }
         catch (Exception e)
         {
             Console.WriteLine(e.ToString());
         }
-
-        /*var thread = new Thread(ThreadStart);
-        thread.Start();*/
     }
 
     // function to send a packet
     public void sendPacket(byte packetID, byte[] data)
     {
-        /*stream.WriteByte(packetID);
-        byte[] size = BitConverter.GetBytes(data.Length);
-        stream.Write(size, 0, size.Length);
-        stream.Flush();
-        stream.Write(data, 0, data.Length);
-        stream.Flush();*/
-        int[] ints = new int[] { packetID, data.Length };
-        byte[] packet = new byte[8 + data.Length];
-        Buffer.BlockCopy(ints, 0, packet, 0, 8);
-        Buffer.BlockCopy(data, 0, packet, 8, data.Length);
+        if (socket.State != WebSocketState.Open) return;
+
+        int[] ints = new int[] { data.Length };
+        byte[] packet = new byte[5 + data.Length];
+        packet[0] = packetID;
+        Buffer.BlockCopy(ints, 0, packet, 1, 4);
+        Buffer.BlockCopy(data, 0, packet, 5, data.Length);
         socket.Send(packet);
     }
 
     public void update()
     {
+        // call received messages
+#if !UNITY_WEBGL || UNITY_EDITOR
+        socket.DispatchMessageQueue();
+#endif
+
         // if avaiable packets
         if (packets.Count > 0)
         {

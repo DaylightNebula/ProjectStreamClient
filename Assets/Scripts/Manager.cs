@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
-    public string behaviorAddress = "127.0.0.1";
+    public string behaviorAddress = "75.161.35.119";
     public int behaviorPort = 35524;
 
     public AssetClient assetClient;

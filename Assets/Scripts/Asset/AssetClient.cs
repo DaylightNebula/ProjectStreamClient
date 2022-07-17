@@ -1,3 +1,4 @@
+using NativeWebSocket;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,8 +11,7 @@ public class AssetClient
     AssetPacketHandler packetHandler;
 
     // NETWORK VARS
-    TcpClient client;
-    NetworkStream stream;
+    WebSocket socket;
 
     // PACKET STUFF
     public struct Packet
@@ -33,73 +33,40 @@ public class AssetClient
     }
 
     // Start the client
-    public void start(string address, int port)
+    List<byte[]> waitingSends = new List<byte[]>();
+    public async void start(string address, int port)
     {
-        Debug.Log("Starting asset client!  Connecting to " + address + ":" + port);
+        Debug.Log("Starting asset client!");
         try
         {
             // create tcp client
-            client = new TcpClient(address, port);
-            stream = client.GetStream();
+            socket = new WebSocket("ws://" + address + ":" + port);
 
-            // send hello packet
-            sendPacket(
-                0x00, new byte[0]
-            );
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-        }
-
-        var thread = new Thread(ThreadStart);
-        thread.Start();
-    }
-
-    // function to send a packet
-    public void sendPacket(byte packetID, byte[] data)
-    {
-        stream.WriteByte(packetID);
-        byte[] size = BitConverter.GetBytes(data.Length);
-        stream.Write(size, 0, size.Length);
-        stream.Flush();
-        stream.Write(data, 0, data.Length);
-        stream.Flush();
-    }
-
-    // creates a loop on another thread to get packets from network stream
-    bool runRecvLoop = true;
-    public void ThreadStart()
-    {
-        while (runRecvLoop)
-        {
-            // check for available packets
-            if (stream != null && stream.DataAvailable)
+            // some basic callbacks for websocket
+            socket.OnOpen += () =>
             {
-                // get packet id
-                byte[] idBytes = new byte[1];
-                stream.Read(idBytes, 0, 1);
-                int packetID = idBytes[0];
+                Debug.Log("Connection open!");
+                foreach (byte[] bytes in waitingSends)
+                    socket.Send(bytes);
+            };
 
-                // get packet size
-                byte[] sizeBytes = new byte[4];
-                stream.Read(sizeBytes, 0, 4);
-                int packetSize = BitConverter.ToInt32(sizeBytes, 0);
+            socket.OnError += (e) =>
+            {
+                Debug.Log("Error! " + e);
+            };
 
-                // get data
-                /*byte[] data = new byte[packetSize];
-                stream.Read(data, 0, packetSize);
-                packetHandler.processPacket(packetID, data);*/
-                byte[] data = new byte[packetSize];
-                int counter = 0;
-                do
-                {
-                    if (stream.DataAvailable)
-                    {
-                        data[counter] = (byte)stream.ReadByte();
-                        counter++;
-                    }
-                } while (counter < packetSize);
+            socket.OnClose += (e) =>
+            {
+                Debug.Log("Connection closed!");
+            };
+
+            // receive callback
+            socket.OnMessage += (bytes) =>
+            {
+                byte packetID = bytes[0];
+                int packetLength = BitConverter.ToInt32(bytes, 1);
+                byte[] data = new byte[packetLength];
+                Buffer.BlockCopy(bytes, 5, data, 0, packetLength);
 
                 // save packet list
                 lock (packets)
@@ -111,12 +78,38 @@ public class AssetClient
                         )
                     );
                 }
-            }
+            };
+
+            await socket.Connect();
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+        }
+    }
+
+    // function to send a packet
+    public void sendPacket(byte packetID, byte[] data)
+    {
+        int[] ints = new int[] { data.Length };
+        byte[] packet = new byte[5 + data.Length];
+        packet[0] = packetID;
+        Buffer.BlockCopy(ints, 0, packet, 1, 4);
+        Buffer.BlockCopy(data, 0, packet, 5, data.Length);
+
+        if (socket.State == WebSocketState.Open)
+            socket.Send(packet);
+        else
+            waitingSends.Add(packet);
     }
 
     public void update()
     {
+        // receive messages
+#if !UNITY_WEBGL || UNITY_EDITOR
+        socket.DispatchMessageQueue();
+#endif
+
         // if avaiable packets
         if (packets.Count > 0)
         {
@@ -136,8 +129,6 @@ public class AssetClient
 
     public void dispose()
     {
-        // on quit, close the connection
-        if (client != null) client.Close();
-        runRecvLoop = false;
+        socket.Close();
     }
 }
