@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.looooong.asyncimageloader": "https://github.com/Looooong/UnityAsyncImageLoader.git",
+    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm",
     "com.unity.collab-proxy": "1.15.18",
     "com.unity.feature.development": "1.0.1",
     "com.unity.feature.vr": "1.0.0",

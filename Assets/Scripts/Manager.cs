@@ -1,14 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net.Sockets;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class Manager : MonoBehaviour
 {
-    public string behaviorAddress = "localhost";
+    public string behaviorAddress = "127.0.0.1";
     public int behaviorPort = 35524;
 
     public AssetClient assetClient;
@@ -34,17 +29,6 @@ public class Manager : MonoBehaviour
 
     public bool usingHeadset = true;
     DesktopMouseLook mouseLook;
-
-    public InputAction aButton;
-    public InputAction bButton;
-    public InputAction xButton;
-    public InputAction yButton;
-    public InputAction lTriggerPress;
-    public InputAction rTriggerPress;
-    public InputAction lGripPress;
-    public InputAction rGripPress;
-    public InputAction lJoyPress;
-    public InputAction rJoyPress;
 
     void Awake()
     {

@@ -1,17 +1,16 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
+
+using NativeWebSocket;
 
 public class BehaviorClient
 {
     BehaviorPacketHandler packetHandler;
 
     // NETWORK VARS
-    TcpClient client;
-    NetworkStream stream;
+    WebSocket socket;
 
     // PACKET STUFF
     public struct Packet
@@ -33,73 +32,37 @@ public class BehaviorClient
     }
 
     // Start the client
-    public void start(string address, int port)
+    public async void start(string address, int port)
     {
         Debug.Log("Starting behavior client!");
         try
         {
             // create tcp client
-            client = new TcpClient(address, port);
-            stream = client.GetStream();
+            socket = new WebSocket("ws://" + address + ":" + port);
 
-            // send hello packet
-            sendPacket(
-                0x00, new byte[0]
-            );
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-        }
-
-        var thread = new Thread(ThreadStart);
-        thread.Start();
-    }
-
-    // function to send a packet
-    public void sendPacket(byte packetID, byte[] data)
-    {
-        stream.WriteByte(packetID);
-        byte[] size = BitConverter.GetBytes(data.Length);
-        stream.Write(size, 0, size.Length);
-        stream.Flush();
-        stream.Write(data, 0, data.Length);
-        stream.Flush();
-    }
-
-    // creates a loop on another thread to get packets from network stream
-    bool runRecvLoop = true;
-    public void ThreadStart()
-    {
-        while (runRecvLoop)
-        {
-            // check for available packets
-            if (stream != null && stream.DataAvailable)
+            // some basic callbacks for websocket
+            socket.OnOpen += () =>
             {
-                // get packet id
-                byte[] idBytes = new byte[1];
-                stream.Read(idBytes, 0, 1);
-                int packetID = idBytes[0];
+                Debug.Log("Connection open!");
+            };
 
-                // get packet size
-                byte[] sizeBytes = new byte[4];
-                stream.Read(sizeBytes, 0, 4);
-                int packetSize = BitConverter.ToInt32(sizeBytes, 0);
+            socket.OnError += (e) =>
+            {
+                Debug.Log("Error! " + e);
+            };
 
-                // get data
-                /*byte[] data = new byte[packetSize];
-                stream.Read(data, 0, packetSize);
-                packetHandler.processPacket(packetID, data);*/
-                byte[] data = new byte[packetSize];
-                int counter = 0;
-                do
-                {
-                    if (stream.DataAvailable)
-                    {
-                        data[counter] = (byte)stream.ReadByte();
-                        counter++;
-                    }
-                } while (counter < packetSize);
+            socket.OnClose += (e) =>
+            {
+                Debug.Log("Connection closed!");
+            };
+
+            // receive callback
+            socket.OnMessage += (bytes) =>
+            {
+                int packetID = BitConverter.ToInt32(bytes, 0);
+                int packetLength = BitConverter.ToInt32(bytes, 0);
+                byte[] data = new byte[packetLength];
+                Buffer.BlockCopy(bytes, 8, data, 0, packetLength);
 
                 // save packet list
                 lock (packets)
@@ -111,8 +74,38 @@ public class BehaviorClient
                         )
                     );
                 }
-            }
+            };
+
+            await socket.Connect();
+
+            // send hello packet
+            sendPacket(
+                0x00, new byte[0]
+            );
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+        }
+
+        /*var thread = new Thread(ThreadStart);
+        thread.Start();*/
+    }
+
+    // function to send a packet
+    public void sendPacket(byte packetID, byte[] data)
+    {
+        /*stream.WriteByte(packetID);
+        byte[] size = BitConverter.GetBytes(data.Length);
+        stream.Write(size, 0, size.Length);
+        stream.Flush();
+        stream.Write(data, 0, data.Length);
+        stream.Flush();*/
+        int[] ints = new int[] { packetID, data.Length };
+        byte[] packet = new byte[8 + data.Length];
+        Buffer.BlockCopy(ints, 0, packet, 0, 8);
+        Buffer.BlockCopy(data, 0, packet, 8, data.Length);
+        socket.Send(packet);
     }
 
     public void update()
@@ -136,8 +129,6 @@ public class BehaviorClient
 
     public void dispose()
     {
-        // on quit, close the connection
-        if (client != null) client.Close();
-        runRecvLoop = false;
+        socket.Close();
     }
 }
