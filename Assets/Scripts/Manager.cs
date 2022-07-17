@@ -21,18 +21,9 @@ public class Manager : MonoBehaviour
 
     public ActionManager actionManager;
 
-    public GameObject hmd;
-    public GameObject leftController;
-    public GameObject rightController;
-    Vector3 hmdLastPosition;
-    Vector3 hmdLastRotation;
-    Vector3 lControllerLastPosition;
-    Vector3 lControllerLastRotation;
-    Vector3 rControllerLastPosition;
-    Vector3 rControllerLastRotation;
+    public GameObject camera;
 
     public GameObject baseObject;
-    public GameObject baseParticle;
     public Shader shader;
     public Shader particleShader;
     public Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
@@ -110,7 +101,7 @@ public class Manager : MonoBehaviour
         if (!usingHeadset)
         {
             mouseLook = new DesktopMouseLook();
-            mouseLook.Start(hmd, leftController, rightController);
+            mouseLook.Start(camera);
         }
 
         // enable vsync

@@ -5,7 +5,7 @@ using UnityEngine;
 public class DesktopMouseLook
 {
     // game object variables
-    GameObject headset, leftController, rightController;
+    GameObject headset;
 
     // mouse look variables
     public float sensitivityX = 10F;
@@ -20,19 +20,13 @@ public class DesktopMouseLook
     Quaternion originalRotation;
 
     // Start is called before the first frame update
-    public void Start(GameObject headset, GameObject leftController, GameObject rightController)
+    public void Start(GameObject headset)
     {
         // set game object variables
         this.headset = headset;
-        this.leftController = leftController;
-        this.rightController = rightController;
 
         // update original rotation
         originalRotation = headset.transform.localRotation;
-
-        // move left and right controllers to the headset
-        leftController.transform.SetPositionAndRotation(headset.transform.position, originalRotation);
-        rightController.transform.SetPositionAndRotation(headset.transform.position, originalRotation);
 
         // hide and lock the cursor
         Cursor.lockState = CursorLockMode.Locked;
@@ -73,8 +67,6 @@ public class DesktopMouseLook
         // update rotations
         Quaternion newRotation = originalRotation * xQuaternion * yQuaternion;
         headset.transform.localRotation = newRotation;
-        leftController.transform.localRotation = newRotation;
-        rightController.transform.localRotation = newRotation;
 
         // get movement amount
         float forwardMove = 0f;
@@ -90,8 +82,6 @@ public class DesktopMouseLook
         headsetForward.Normalize();
         headsetRight.Normalize();
         headset.transform.position += (headsetForward * forwardMove) + (headsetRight * rightMove);
-        leftController.transform.position = headset.transform.position;
-        rightController.transform.position = headset.transform.position;
     }
 
     public float ClampAngle(float angle, float min, float max)
