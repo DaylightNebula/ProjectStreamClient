@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class Action
@@ -26,7 +28,17 @@ public class Action
 
     public void execute(Manager manager)
     {
+        // call all instructions in this action
         foreach (Instruction i in instructions)
             i.execute(manager, null);
+
+        // tell behavior server that this action was called if this is not an update action
+        if (name == "#update") return;
+        int[] nameLength = new int[] { name.Length };
+        byte[] nameBytes = Encoding.UTF8.GetBytes(name);
+        byte[] packet = new byte[4 + name.Length];
+        Buffer.BlockCopy(nameLength, 0, packet, 0, 4);
+        Buffer.BlockCopy(nameBytes, 0, packet, 4, nameBytes.Length);
+        manager.behaviorClient.sendPacket(0x09, packet);
     }
 }
