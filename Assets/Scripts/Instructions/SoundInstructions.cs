@@ -24,6 +24,10 @@ public class PlaySoundFromEntityInstruction : Instruction
 
     public override void execute(Manager manager, GameObject root)
     {
-        throw new System.NotImplementedException();
+        if (!manager.entities.ContainsKey(entityName)) return;
+        GameObject entity = manager.entities[entityName];
+
+        manager.assetPacketHandler.soundAssetManager.playSoundFromObject(manager, entity, soundName, volume, wait);
+        entity.GetComponent<EntityManager>();
     }
 }
