@@ -75,6 +75,11 @@ public class EntityManager : MonoBehaviour
         manager.behaviorClient.sendPacket(0x08, data);*/
     }
 
+    public void remove()
+    {
+        Destroy(gameObject);
+    }
+
     public void addMesh(string mesh)
     {
         Debug.Log("Mesh " + mesh);
@@ -155,8 +160,15 @@ public class EntityManager : MonoBehaviour
         }
     }
 
-    public void setLight(string type, float intensity, float size, float angle, Color color)
+    public void setLight(bool enabled, string type, float intensity, float size, float angle, Color color)
     {
+        // if light is not enabled, any light should be removed
+        if (!enabled)
+        {
+            if (light != null) Destroy(light);
+            return;
+        }
+
         // make sure we have a light
         if (light == null)
             light = gameObject.AddComponent<Light>();
@@ -179,5 +191,42 @@ public class EntityManager : MonoBehaviour
         light.range = size;
         light.spotAngle = angle;
         light.color = color;
+    }
+
+    public void setParticleEmitter(bool enabled, Vector3 directionScale, string texture, float lifetime, float duration, float speed, float size, float rate)
+    {
+        // if particle emitter should not be enabled, any particle system or renderer must be removed
+        if (!enabled)
+        {
+            // get particle system and renderer
+            ParticleSystem system = gameObject.GetComponent<ParticleSystem>();
+            ParticleSystemRenderer renderer = gameObject.GetComponent<ParticleSystemRenderer>();
+
+            // if they exist, destroy them
+            if (system != null) Destroy(system);
+            if (renderer != null) Destroy(renderer);
+
+            // cancel function
+            return;
+        }
+
+        // create object and get components
+        ParticleSystem particleSystem = gameObject.AddComponent<ParticleSystem>();
+        DestroyAfterTime destroyer = gameObject.AddComponent<DestroyAfterTime>();
+
+        // set kill time
+        destroyer.destroySeconds = lifetime;
+
+        // set particle
+        particleSystem.startLifetime = duration;
+        particleSystem.startSpeed = speed;
+        particleSystem.startSize = size;
+        ParticleSystem.EmissionModule emission = particleSystem.emission;
+        emission.rate = rate;
+        ParticleSystem.ShapeModule shape = particleSystem.shape;
+        shape.scale = directionScale;
+
+        // set particle texture
+        manager.assetPacketHandler.textureAssetManager.setTexture(manager, gameObject.AddComponent<ParticleSystemRenderer>(), texture);
     }
 }

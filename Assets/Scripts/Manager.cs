@@ -17,7 +17,9 @@ public class Manager : MonoBehaviour
     public BehaviorClient behaviorClient;
     public BehaviorPacketHandler behaviorPacketHandler;
 
-    public InputManager inputManager;
+    public XMLDecoder xmlDecoder;
+
+    public ActionManager actionManager;
 
     public GameObject hmd;
     public GameObject leftController;
@@ -59,13 +61,16 @@ public class Manager : MonoBehaviour
         //instructionManager = new InstructionManager(this);
 
         // create input manager
-        inputManager = new InputManager(this);
+        actionManager = new ActionManager(this);
 
         // create behavior server connections
         behaviorPacketHandler = new BehaviorPacketHandler(this);
         behaviorClient = new BehaviorClient(behaviorPacketHandler);
         behaviorPacketHandler.setClient(behaviorClient);
         behaviorClient.start(behaviorAddress, behaviorPort);
+
+        // create xml decoder
+        xmlDecoder = new XMLDecoder(this);
     }
 
     public void makeMeshExist(string mesh)
@@ -120,6 +125,9 @@ public class Manager : MonoBehaviour
         {
             mouseLook.Update();
         }
+
+        if (assetClient != null)
+            actionManager.update();
     }
 
     void FixedUpdate()
@@ -144,33 +152,6 @@ public class Manager : MonoBehaviour
     {
         return points.ContainsKey(point);
     }
-
-    /*private void SendPointUpdateLocation(string point, Vector3 position, Vector3 rotation)
-    {
-        // make sure behavior client exists
-        if (behaviorClient == null) return;
-
-        // build int array for id
-        int[] id = new int[1];
-        id[0] = pointID;
-
-        // build float array
-        float[] floats = new float[12];
-        floats[0] = position.x;
-        floats[1] = position.y;
-        floats[2] = position.z;
-        floats[3] = rotation.x;
-        floats[4] = rotation.y;
-        floats[5] = rotation.z;
-
-        // build packet
-        byte[] data = new byte[28];
-        Buffer.BlockCopy(id, 0, data, 0, 4);
-        Buffer.BlockCopy(floats, 0, data, 4, 24);
-
-        // send packet
-        behaviorClient.sendPacket(7, data);
-    }*/
 
     public void SendButtonPress(byte buttonID)
     {

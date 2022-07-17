@@ -8,12 +8,9 @@ public class BehaviorPacketHandler
     public Manager manager;
     BehaviorClient client;
 
-    XMLDecoder xmlDecoder;
-
     public BehaviorPacketHandler(Manager manager)
     {
         this.manager = manager;
-        xmlDecoder = new XMLDecoder(manager);
     }
 
     public void setClient(BehaviorClient client)
@@ -50,7 +47,7 @@ public class BehaviorPacketHandler
                 string fileText = System.Text.Encoding.UTF8.GetString(data).Substring(5, fileLength);
 
                 // call decode
-                xmlDecoder.decode(fileType, fileText);
+                manager.xmlDecoder.decode(fileType, fileText);
 
                 // end
                 break;

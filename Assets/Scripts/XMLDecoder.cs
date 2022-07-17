@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml;
 using UnityEngine;
 
@@ -5,6 +6,8 @@ public class XMLDecoder
 {
     Manager manager;
     public XMLDecoder(Manager manager) { this.manager = manager; }
+
+    string onUpdateInstruction;
 
     public void decode(byte type, string text)
     {
@@ -19,10 +22,25 @@ public class XMLDecoder
                 decodeScene(document.FirstChild);
                 break;
             case 1:
-                decodeInput(document.FirstChild);
+                decodeActions(document.FirstChild);
                 break;
             case 2:
-                decodeInstructions(document.FirstChild);
+                InstructionContainer instructions = decodeInstructions(document.FirstChild);
+                switch(instructions.executeTime)
+                {
+                    case "on_update":
+                        manager.actionManager.addAction(
+                            new Action(
+                                "#update",
+                                new Condition[] { new OnUpdateCondition() },
+                                instructions.instructions
+                            )
+                        );
+                        break;
+                    default:
+                        Debug.Log("Unknow execute time " + instructions.executeTime);
+                        break;
+                }
                 break;
             case 3:
                 decodeEntity(document.FirstChild);
@@ -33,7 +51,7 @@ public class XMLDecoder
         }
     }
 
-    private void decodeScene(XmlNode xml)
+    public void decodeScene(XmlNode xml)
     {
         // loop through all entities in the scene and decode them
         XmlNodeList entities = xml.ChildNodes;
@@ -43,7 +61,7 @@ public class XMLDecoder
         }
     }
 
-    private void decodeEntity(XmlNode xml)
+    public void decodeEntity(XmlNode xml)
     {
         // return if comment
         if (xml.OuterXml.StartsWith("<!--")) return;
@@ -73,17 +91,56 @@ public class XMLDecoder
             decodeComponent(entity.GetComponent<EntityManager>(), componentNode);
     }
 
-    private void decodeInput(XmlNode xml)
+    public void decodeActions(XmlNode xmls)
     {
+        foreach (XmlNode xml in xmls.ChildNodes)
+        {
+            // get xml for conditions and instructinos
+            XmlNode conditionsXML = xml.FirstChild;
+            XmlNode instructionsXML = xml.LastChild;
 
+            manager.actionManager.addAction(
+                new Action(
+                    xml.Attributes["name"].Value,
+                    decodeConditions(conditionsXML),
+                    decodeInstructionToArray(instructionsXML)
+                )
+            );
+        }
     }
 
-    private void decodeInstructions(XmlNode xml)
+    public Condition[] decodeConditions(XmlNode xml)
     {
-
+        // create condition array and return
+        Condition[] conditions = new Condition[xml.ChildNodes.Count];
+        for (int i = 0; i < conditions.Length; i++)
+            conditions[i] = Condition.getCompiledCondition(manager, xml.ChildNodes.Item(i));
+        return conditions;
     }
 
-    private void decodeComponent(EntityManager entity, XmlNode xml)
+    public Instruction[] decodeInstructionToArray(XmlNode xml)
+    {
+        // create instruction array
+        Instruction[] instructions = new Instruction[xml.ChildNodes.Count];
+
+        // loop through all instructions
+        for (int i = 0; i < instructions.Length; i++)
+            instructions[i] = decodeInstruction(xml.ChildNodes.Item(i));
+
+        return instructions;
+    }
+
+    public InstructionContainer decodeInstructions(XmlNode xml) 
+    {
+        return new InstructionContainer(xml.Attributes["run"].Value, decodeInstructionToArray(xml));
+    }
+
+    public Instruction decodeInstruction(XmlNode xml)
+    {
+        return Instruction.getCompiledInstruction(manager, xml);
+    }
+
+    public void decodeComponent(EntityManager entity, XmlNode xml)
     {
         switch(xml.Name)
         {
@@ -98,11 +155,34 @@ public class XMLDecoder
                 break;
             case "light":
                 entity.setLight(
+                    true,
                     decodeString(xml.Attributes["type"], "directional"),
                     decodeFloat(xml.Attributes["intensity"], 1f),
                     decodeFloat(xml.Attributes["range"], 1f),
                     decodeFloat(xml.Attributes["angle"], 1f),
                     decodeColor(xml.Attributes["color"], Color.white)
+                );
+                break;
+            case "rigidbody":
+                entity.setRigidbody(
+                    true,
+                    decodeFloat(xml.Attributes["mass"], 1f),
+                    decodeFloat(xml.Attributes["drag"], 0f),
+                    decodeFloat(xml.Attributes["angularDrag"], 0.05f),
+                    decodeBoolean(xml.Attributes["isKinematic"], false),
+                    decodeBoolean(xml.Attributes["useGravity"], true)
+                );
+                break;
+            case "particleemitter":
+                entity.setParticleEmitter(
+                    true,
+                    decodeVector(xml.Attributes["directionScale"], new Vector3(1f, 1f, 1f)),
+                    decodeString(xml.Attributes["texture"], ""),
+                    decodeFloat(xml.Attributes["lifetime"], 1f),
+                    decodeFloat(xml.Attributes["duration"], 1f),
+                    decodeFloat(xml.Attributes["speed"], 1f),
+                    decodeFloat(xml.Attributes["size"], 1f),
+                    decodeFloat(xml.Attributes["rate"], 1f)
                 );
                 break;
             default:
@@ -111,7 +191,15 @@ public class XMLDecoder
         }
     }
 
-    private bool decodeBoolean(XmlAttribute attribute, bool def)
+    public static GameObject getEntityWithKeywords(Manager manager, GameObject root, string entity)
+    {
+        if (entity == "this") return root;
+        else if (entity == "camera") return Camera.main.gameObject;
+        else if (!manager.entities.ContainsKey("entity")) return null;
+        else return manager.entities[entity];
+    }
+
+    public static bool decodeBoolean(XmlAttribute attribute, bool def)
     {
         if (attribute == null)
             return def;
@@ -119,7 +207,7 @@ public class XMLDecoder
             return attribute.Value == "true";
     }
 
-    private float decodeFloat(XmlAttribute attribute, float def)
+    public static float decodeFloat(XmlAttribute attribute, float def)
     {
         if (attribute == null)
             return def;
@@ -127,7 +215,7 @@ public class XMLDecoder
             return float.Parse(attribute.Value);
     }
 
-    private string decodeString(XmlAttribute attribute, string def)
+    public static string decodeString(XmlAttribute attribute, string def)
     {
         if (attribute == null)
             return def;
@@ -135,7 +223,7 @@ public class XMLDecoder
             return attribute.Value;
     }
 
-    private Vector3 decodeVector(XmlAttribute attribute, Vector3 def)
+    public static Vector3 decodeVector(XmlAttribute attribute, Vector3 def)
     {
         if (attribute == null)
             return def;
@@ -151,7 +239,7 @@ public class XMLDecoder
         }
     }
 
-    private Color decodeColor(XmlAttribute attribute, Color def)
+    public static Color decodeColor(XmlAttribute attribute, Color def)
     {
         if (attribute == null)
             return def;
