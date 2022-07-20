@@ -93,6 +93,11 @@ public class XMLDecoder
 
     public void decodeActions(XmlNode xmls)
     {
+        // make sure actions are for our plaform
+        string platform = xmls.Attributes["type"].Value;
+        if (platform != manager.platform) return;
+
+        // loop through each action and decompile it
         foreach (XmlNode xml in xmls.ChildNodes)
         {
             // get xml for conditions and instructinos

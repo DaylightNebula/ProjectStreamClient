@@ -35,11 +35,13 @@ public class BehaviorClient
     // Start the client
     public async void start(string address, int port)
     {
-        Debug.Log("Starting behavior client!");
         try
         {
             // create tcp client
-            socket = new WebSocket("ws://" + address + ":" + port);
+            string targetAddress = "ws://" + address + ":" + port;
+            if (Application.isEditor) targetAddress = "ws://localhost:" + port;
+            socket = new WebSocket(targetAddress);
+            Debug.Log("Starting behavior client! " + targetAddress);
 
             // some basic callbacks for websocket
             socket.OnOpen += () =>

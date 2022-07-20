@@ -36,11 +36,13 @@ public class AssetClient
     List<byte[]> waitingSends = new List<byte[]>();
     public async void start(string address, int port)
     {
-        Debug.Log("Starting asset client!");
         try
         {
             // create tcp client
-            socket = new WebSocket("ws://" + address + ":" + port);
+            string targetAddress = "ws://" + address + ":" + port;
+            if (Application.isEditor) targetAddress = "ws://localhost:" + port;
+            socket = new WebSocket(targetAddress);
+            Debug.Log("Starting asset client!" + targetAddress);
 
             // some basic callbacks for websocket
             socket.OnOpen += () =>

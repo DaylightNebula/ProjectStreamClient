@@ -37,8 +37,8 @@ public class DesktopMouseLook
     bool useCursor = true;
     public void Update()
     {
-        // cancel if 6 is pressed
-        if (Input.GetKeyDown(KeyCode.F1))
+        // cancel if F1 is pressed and we are in the editor
+        if (Input.GetKeyDown(KeyCode.F1) && Application.isEditor)
         {
             if (useCursor)
             {
@@ -69,7 +69,7 @@ public class DesktopMouseLook
         headset.transform.localRotation = newRotation;
 
         // get movement amount
-        float forwardMove = 0f;
+        /*float forwardMove = 0f;
         float rightMove = 0f;
         if (Input.GetKey(KeyCode.W)) forwardMove = WASDsensitivity;
         if (Input.GetKey(KeyCode.S)) forwardMove = -WASDsensitivity;
@@ -81,7 +81,7 @@ public class DesktopMouseLook
         Vector3 headsetRight = new Vector3(headset.transform.right.x, 0f, headset.transform.right.z);
         headsetForward.Normalize();
         headsetRight.Normalize();
-        headset.transform.position += (headsetForward * forwardMove) + (headsetRight * rightMove);
+        headset.transform.position += (headsetForward * forwardMove) + (headsetRight * rightMove);*/
     }
 
     public float ClampAngle(float angle, float min, float max)

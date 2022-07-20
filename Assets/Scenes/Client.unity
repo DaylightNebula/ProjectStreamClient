@@ -401,7 +401,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 115b028c13556964f81e9f917eb576b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  behaviorAddress: localhost
+  platform: keyboard
+  behaviorAddress: 75.161.35.119
   behaviorPort: 35524
   camera: {fileID: 1486946897}
   baseObject: {fileID: 4198128503522169538, guid: d0b306fed866cb049923eeca151d5cda,
