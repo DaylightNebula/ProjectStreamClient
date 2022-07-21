@@ -31,6 +31,17 @@ public class MaterialAssetManager : AssetManager
         string detail_texture_id = readStringFromByteArray(data);
         string emission_texture_id = readStringFromByteArray(data);
 
+        Debug.Log("ID " + id);
+        Debug.Log("Albedo " + albedo_texture_id);
+        Debug.Log("Metallic " + metallic_texture_id);
+        Debug.Log("Metallic Strength " + metallic_strength);
+        Debug.Log("Smoothness " + smoothness);
+        Debug.Log("Normal Tex " + normal_texture_id);
+        Debug.Log("Height Tex " + height_texture_id);
+        Debug.Log("Occlusion Tex " + occlusion_texture_id);
+        Debug.Log("Detail Tex " + detail_texture_id);
+        Debug.Log("Emission Tex " + emission_texture_id);
+
         // create material
         Material mat = new Material(manager.shader);
         mat.name = "mat_" + id;
@@ -70,7 +81,11 @@ public class MaterialAssetManager : AssetManager
     {
         // get length, if it is 0, return a blank string
         int length = BitConverter.ToInt32(bytes, counter);
-        if (length == 0) return "";
+        if (length == 0)
+        {
+            counter += 4;
+            return "";
+        }
 
         // get string bytes from data
         byte[] string_bytes = new byte[length];

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
@@ -18,6 +20,9 @@ public class Manager : MonoBehaviour
     public ActionManager actionManager;
 
     public GameObject camera;
+    [SerializeField]
+    public PlatformPlayer[] players;
+    public GameObject currentPlayer;
 
     public GameObject baseObject;
     public Shader shader;
@@ -27,15 +32,10 @@ public class Manager : MonoBehaviour
     public Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
     public Dictionary<string, GameObject> entities = new Dictionary<string, GameObject>();
     private Dictionary<string, KeyValuePair<Vector3, Vector3>> points = new Dictionary<string, KeyValuePair<Vector3, Vector3>>();
-
-    public bool usingHeadset = true;
-    DesktopMouseLook mouseLook;
+    private Dictionary<string, float> variables = new Dictionary<string, float>();
 
     void Awake()
     {
-        // create instruction manager
-        //instructionManager = new InstructionManager(this);
-
         // create input manager
         actionManager = new ActionManager(this);
 
@@ -47,6 +47,28 @@ public class Manager : MonoBehaviour
 
         // create xml decoder
         xmlDecoder = new XMLDecoder(this);
+
+        // set active state of platforms
+        foreach (PlatformPlayer platformPlayer in players)
+        {
+            bool isPlatform = platformPlayer.platform == platform;
+            platformPlayer.player.SetActive(isPlatform);
+            if (isPlatform)
+                currentPlayer = platformPlayer.player;
+        }
+    }
+
+    public float getVariable(string name)
+    {
+        if (variables.ContainsKey(name))
+            return variables[name];
+        else
+            return 0f;
+    }
+
+    public void setVariable(string name, float value)
+    {
+        variables[name] = value;
     }
 
     public void makeMeshExist(string mesh)
@@ -80,28 +102,9 @@ public class Manager : MonoBehaviour
         assetClient.start(address, port);
     }
 
-    void Start()
-    {
-        // if not using headset, initialize mouse look
-        if (!usingHeadset)
-        {
-            mouseLook = new DesktopMouseLook();
-            mouseLook.Start(camera);
-        }
-
-        // enable vsync
-        //QualitySettings.vSyncCount = 0;
-        //Application.targetFrameRate = 60;
-    }
-
     void Update()
     {
-        // if not using headset, update mouse look
-        if (!usingHeadset)
-        {
-            mouseLook.Update();
-        }
-
+        // update actions
         if (assetClient != null)
             actionManager.update();
     }
@@ -164,4 +167,8 @@ public class Manager : MonoBehaviour
     {
         Destroy(obj);
     }
+
+
+    [Serializable]
+    public struct PlatformPlayer { public string platform; public GameObject player; }
 }

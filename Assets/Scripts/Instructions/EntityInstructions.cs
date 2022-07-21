@@ -11,13 +11,13 @@ public class EntitySpawnInstruction : Instruction
         this.xml = xml;
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         foreach (XmlNode entity in xml.ChildNodes)
             manager.xmlDecoder.decodeEntity(entity);
     }
 }
-public class EntityRemoveInstruction: Instruction
+public class EntityRemoveInstruction : Instruction
 {
     string entityName;
 
@@ -26,7 +26,7 @@ public class EntityRemoveInstruction: Instruction
         entityName = xml.Attributes["entity"].Value;
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         if (manager.entities.ContainsKey(entityName))
             manager.entities[entityName].GetComponent<EntityManager>().remove();
@@ -47,7 +47,7 @@ public class EntitySetTransformInstruction : Instruction
         scale = XMLDecoder.decodeVector(xml.Attributes["scale"], new Vector3(1f, 1f, 1f));
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         if (!manager.entities.ContainsKey(entityName)) return;
         GameObject entity = manager.entities[entityName];
@@ -66,7 +66,7 @@ public class SetEntityActiveInstruction: Instruction
         active = XMLDecoder.decodeBoolean(xml.Attributes["active"], true);
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         if (!manager.entities.ContainsKey(entityName)) return;
         GameObject entity = manager.entities[entityName];
@@ -88,7 +88,7 @@ public class MoveEntityInstruction : Instruction
         isAdditive = XMLDecoder.decodeBoolean(xml.Attributes["isAdditive"], true);
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         // try to get entity
         if (!manager.entities.ContainsKey(entityName)) return;

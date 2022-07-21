@@ -405,11 +405,16 @@ MonoBehaviour:
   behaviorAddress: 75.161.35.119
   behaviorPort: 35524
   camera: {fileID: 1486946897}
+  players:
+  - platform: keyboard
+    player: {fileID: 4149479100392753771}
+  - platform: xr
+    player: {fileID: 1725982592}
+  currentPlayer: {fileID: 0}
   baseObject: {fileID: 4198128503522169538, guid: d0b306fed866cb049923eeca151d5cda,
     type: 3}
   shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   particleShader: {fileID: 211, guid: 0000000000000000f000000000000000, type: 0}
-  usingHeadset: 0
 --- !u!4 &1165967867
 Transform:
   m_ObjectHideFlags: 0
@@ -691,6 +696,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4149479099508390896, guid: a6da50505506df14db9980c96a3bb4ea,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4149479099508390897, guid: a6da50505506df14db9980c96a3bb4ea,
         type: 3}
       propertyPath: m_RootOrder
@@ -704,7 +714,7 @@ PrefabInstance:
     - target: {fileID: 4149479099508390897, guid: a6da50505506df14db9980c96a3bb4ea,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4149479099508390897, guid: a6da50505506df14db9980c96a3bb4ea,
         type: 3}
@@ -758,3 +768,34 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a6da50505506df14db9980c96a3bb4ea, type: 3}
+--- !u!1 &4149479100392753771 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4149479099508390899, guid: a6da50505506df14db9980c96a3bb4ea,
+    type: 3}
+  m_PrefabInstance: {fileID: 4149479100392753770}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4149479100392753774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4149479100392753771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a0d609d4ba29141a70a1e89e92fb4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundDistance: 0.1
+  canFall: 0
+  onGround: 0
+  camera: {fileID: 1486946897}
+  sensitivityX: 10
+  sensitivityY: 10
+  minimumX: -360
+  maximumX: 360
+  minimumY: -60
+  maximumY: 60
+  velocity: {x: 0, y: 0, z: 0}
+  gravity: -9.81
+  xzDrag: 0.1

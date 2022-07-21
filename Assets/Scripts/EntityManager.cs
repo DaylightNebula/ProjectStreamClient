@@ -82,7 +82,6 @@ public class EntityManager : MonoBehaviour
 
     public void addMesh(string mesh)
     {
-        Debug.Log("Mesh " + mesh);
         // update ID and make sure everything needed for display exists
         this.mesh = mesh;
         addMeshFilterAndRenderer();

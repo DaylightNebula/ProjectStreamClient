@@ -12,7 +12,7 @@ public class CallEventInstruction : Instruction
         event_id = xml.Attributes["event"].Value;
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         // break if behavior client does not exist
         if (manager.behaviorClient == null) return;

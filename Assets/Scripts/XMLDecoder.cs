@@ -196,10 +196,9 @@ public class XMLDecoder
         }
     }
 
-    public static GameObject getEntityWithKeywords(Manager manager, GameObject root, string entity)
+    public static GameObject getEntityWithKeywords(Manager manager, string entity)
     {
-        if (entity == "this") return root;
-        else if (entity == "camera") return Camera.main.gameObject;
+        if (entity == "camera") return Camera.main.gameObject;
         else if (!manager.entities.ContainsKey("entity")) return null;
         else return manager.entities[entity];
     }
@@ -240,6 +239,21 @@ public class XMLDecoder
                 float.Parse(tokens[0]),
                 float.Parse(tokens[1]),
                 float.Parse(tokens[2])
+            );
+        }
+    }
+
+    public static Vector2 decodeVector(XmlAttribute attribute, Vector2 def)
+    {
+        if (attribute == null)
+            return def;
+        else
+        {
+            string[] tokens = attribute.Value.Split(";");
+            if (tokens.Length != 2) return def;
+            return new Vector2(
+                float.Parse(tokens[0]),
+                float.Parse(tokens[1])
             );
         }
     }

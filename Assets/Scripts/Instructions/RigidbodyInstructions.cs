@@ -14,7 +14,7 @@ public class ApplyForceToRigidbodyInstruction : Instruction
         force = XMLDecoder.decodeVector(xml.Attributes["force"], new Vector3(0f, 0f, 0f));
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         if (!manager.entities.ContainsKey(entityName)) return;
         GameObject entity = manager.entities[entityName];

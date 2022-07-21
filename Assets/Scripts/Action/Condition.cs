@@ -54,7 +54,7 @@ public class ButtonStateCondition: Condition
                 return Input.GetMouseButtonUp(buttonID);
             } 
             else
-                return Input.GetKeyUp((KeyCode)Enum.Parse(typeof(KeyCode), button));
+                return Input.GetKeyUp((KeyCode)Enum.Parse(typeof(KeyCode), button, true));
         }
         else if (state == "down")
         {
@@ -67,7 +67,22 @@ public class ButtonStateCondition: Condition
                 return Input.GetMouseButtonDown(buttonID);
             }
             else
-                return Input.GetKeyDown((KeyCode)Enum.Parse(typeof(KeyCode), button));
+                return Input.GetKeyDown((KeyCode)Enum.Parse(typeof(KeyCode), button, true));
+        }
+        else if (state == "while_down")
+        {
+            if (button.StartsWith("mouse"))
+            {
+                int buttonID = 0;
+                if (button == "mouse left") buttonID = 0;
+                else if (button == "mouse right") buttonID = 1;
+                else if (button == "mouse middle") buttonID = 2;
+                return Input.GetMouseButton(buttonID);
+            }
+            else
+            {
+                return Input.GetKey((KeyCode)Enum.Parse(typeof(KeyCode), button, true));
+            }
         }
         else {
             Debug.LogWarning("No button state created for " + state + " in ButtonStateCondition");

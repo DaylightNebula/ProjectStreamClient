@@ -19,9 +19,9 @@ public class CreatePointFromRaycastInstruction: Instruction
         pointDirection = XMLDecoder.decodeString(xml.Attributes["point_direciton"], "ray_direction");
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
-        GameObject entity = XMLDecoder.getEntityWithKeywords(manager, root, entityName);
+        GameObject entity = XMLDecoder.getEntityWithKeywords(manager, entityName);
 
         // prepare ray
         Vector3 rayDirection = entity.transform.TransformDirection(Vector3.forward) + rotation;
@@ -78,7 +78,7 @@ public class MoveEntityToPointInstruction: Instruction
         rotationOffset = XMLDecoder.decodeVector(xml.Attributes["rotation_offset"], new Vector3(0f, 0f, 0f));
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         // safety stuff
         if (!manager.entities.ContainsKey(entityName)) return;

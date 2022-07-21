@@ -30,7 +30,10 @@ public class Action
     {
         // call all instructions in this action
         foreach (Instruction i in instructions)
-            i.execute(manager, null);
+        {
+            if (i != null) i.execute(manager);
+            else Debug.LogError("Null instruction");
+        }
 
         // tell behavior server that this action was called if this is not an update action
         if (name == "#update") return;

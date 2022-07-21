@@ -22,7 +22,7 @@ public class PlaySoundFromEntityInstruction : Instruction
         wait = XMLDecoder.decodeBoolean(xml.Attributes["wait_for_download"], true);
     }
 
-    public override void execute(Manager manager, GameObject root)
+    public override void execute(Manager manager)
     {
         if (!manager.entities.ContainsKey(entityName)) return;
         GameObject entity = manager.entities[entityName];

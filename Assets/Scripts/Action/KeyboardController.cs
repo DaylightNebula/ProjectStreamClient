@@ -2,40 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DesktopMouseLook
+public class KeyboardController: MonoBehaviour
 {
-    // game object variables
-    GameObject headset;
+    // variables controlling falling and on ground
+    public float groundDistance = 0.05f;
+    public bool canFall = false;
+    public bool onGround = false;
 
     // mouse look variables
+    public GameObject camera;
     public float sensitivityX = 10F;
     public float sensitivityY = 10F;
-    public float WASDsensitivity = 8F;
     public float minimumX = -360F;
     public float maximumX = 360F;
     public float minimumY = -60F;
     public float maximumY = 60F;
     float rotationX = 0F;
     float rotationY = 0F;
-    Quaternion originalRotation;
 
-    // Start is called before the first frame update
-    public void Start(GameObject headset)
+    public Vector3 velocity = new Vector3(0f, 0f, 0f);
+    CharacterController controller;
+    public float gravity = -9.81f;
+    public float xzDrag = 0.1f;
+
+    void Start()
     {
-        // set game object variables
-        this.headset = headset;
-
-        // update original rotation
-        originalRotation = headset.transform.localRotation;
-
         // hide and lock the cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        controller = GetComponent<CharacterController>();
     }
 
-    // Update is called once per frame
     bool useCursor = true;
-    public void Update()
+    void Update()
     {
         // cancel if F1 is pressed and we are in the editor
         if (Input.GetKeyDown(KeyCode.F1) && Application.isEditor)
@@ -65,23 +65,26 @@ public class DesktopMouseLook
         Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, -Vector3.right);
 
         // update rotations
-        Quaternion newRotation = originalRotation * xQuaternion * yQuaternion;
-        headset.transform.localRotation = newRotation;
+        transform.localRotation = xQuaternion;
+        camera.transform.localRotation = yQuaternion;
 
-        // get movement amount
-        /*float forwardMove = 0f;
-        float rightMove = 0f;
-        if (Input.GetKey(KeyCode.W)) forwardMove = WASDsensitivity;
-        if (Input.GetKey(KeyCode.S)) forwardMove = -WASDsensitivity;
-        if (Input.GetKey(KeyCode.A)) rightMove = -WASDsensitivity;
-        if (Input.GetKey(KeyCode.D)) rightMove = WASDsensitivity;
-        forwardMove *= Time.deltaTime;
-        rightMove *= Time.deltaTime;
-        Vector3 headsetForward = new Vector3(headset.transform.forward.x, 0f, headset.transform.forward.z);
-        Vector3 headsetRight = new Vector3(headset.transform.right.x, 0f, headset.transform.right.z);
-        headsetForward.Normalize();
-        headsetRight.Normalize();
-        headset.transform.position += (headsetForward * forwardMove) + (headsetRight * rightMove);*/
+        // check if can fall
+        RaycastHit hit;
+        canFall = Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity);
+        if (!canFall && velocity.y < 0f)
+            velocity.y = 0f;
+
+        // if we can fall, check ground distance
+        onGround = hit.distance < groundDistance;
+
+        // apply gravity to velocity
+        if (canFall && !onGround) velocity.y += gravity * Time.deltaTime;
+
+        // if on ground and velocity is going down, set velocity to 0
+        if (onGround && velocity.y < 0f) velocity.y = 0f;
+
+        // apply velocity
+        controller.Move(velocity * Time.deltaTime);
     }
 
     public float ClampAngle(float angle, float min, float max)

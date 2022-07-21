@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class Instruction
 {
     public Instruction(Manager manager, XmlNode xml) { }
-    public abstract void execute(Manager manager, GameObject root);
+    public abstract void execute(Manager manager);
 
     // STATIC
     public static Instruction getCompiledInstruction(Manager manager, XmlNode xml)
@@ -23,16 +23,23 @@ public abstract class Instruction
             case "sound_playfromentity": return new PlaySoundFromEntityInstruction(manager, xml);
             case "event_call": return new CallEventInstruction(manager, xml);
             case "rigidbody_applyforce": return new ApplyForceToRigidbodyInstruction(manager, xml);
+            case "user_move": return new UserMoveInstruction(manager, xml);
+            case "user_addvel": return new UserAddVelocityInstruction(manager, xml);
+            case "var_set": return new SetVariableInstruction(manager, xml);
+            case "var_mod": return new ModifyVariableInstruction(manager, xml);
+            case "if": return new IfInstruction(manager, xml);
+            case "loopwhile": return new LoopWhileInstruciton(manager, xml);
+            case "loop": return new LoopInstruction(manager, xml);
             default:
                 Debug.LogWarning("No instruction registered for " + xml.Name);
                 return null;
         }
     }
 
-    public static void runInstructions(Manager manager, GameObject root, InstructionContainer instructions)
+    public static void runInstructions(Manager manager, InstructionContainer instructions)
     {
         foreach (Instruction i in instructions.instructions)
-            i.execute(manager, root);
+            i.execute(manager);
     }
 }
 public class InstructionContainer
