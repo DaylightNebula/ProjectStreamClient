@@ -196,7 +196,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1165967867}
   - component: {fileID: 1165967866}
-  - component: {fileID: 1165967868}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -219,7 +218,7 @@ MonoBehaviour:
   platform: keyboard
   behaviorAddress: 75.161.35.119
   behaviorPort: 35524
-  camera: {fileID: 0}
+  effectManager: {fileID: 1591566114}
   players:
   - platform: keyboard
     player: {fileID: 4240581587686040853, guid: bc5386837cb42124ab7fb4d9acf2759e,
@@ -247,20 +246,66 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1165967868
+--- !u!1 &1591566112
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1591566115}
+  - component: {fileID: 1591566114}
+  - component: {fileID: 1591566113}
+  m_Layer: 0
+  m_Name: PostProcessingEffects
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1591566113
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1165967865}
+  m_GameObject: {fileID: 1591566112}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sharedProfile: {fileID: 11400000, guid: 1e104714a1d955c4695918c0b56713cc, type: 2}
+  sharedProfile: {fileID: 11400000, guid: 1feb98c9b74893a40ac03292627e4df2, type: 2}
   isGlobal: 1
   blendDistance: 0
   weight: 1
   priority: 0
+--- !u!114 &1591566114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591566112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17ddc0da3f60ea34f98c7406ee378611, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  volume: {fileID: 1591566113}
+--- !u!4 &1591566115
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591566112}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.3839073, y: 0.62627226, z: 1.4845643}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

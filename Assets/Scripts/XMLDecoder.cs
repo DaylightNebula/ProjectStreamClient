@@ -37,6 +37,9 @@ public class XMLDecoder
                             )
                         );
                         break;
+                    case "now":
+                        Instruction.runInstructions(manager, instructions);
+                        break;
                     default:
                         Debug.Log("Unknow execute time " + instructions.executeTime);
                         break;

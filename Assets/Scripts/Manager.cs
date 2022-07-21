@@ -19,7 +19,8 @@ public class Manager : MonoBehaviour
 
     public ActionManager actionManager;
 
-    public GameObject camera;
+    public EffectManager effectManager;
+
     [SerializeField]
     public PlatformPlayer[] players;
     public GameObject currentPlayer;

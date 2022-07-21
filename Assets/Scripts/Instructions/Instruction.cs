@@ -30,6 +30,9 @@ public abstract class Instruction
             case "if": return new IfInstruction(manager, xml);
             case "loopwhile": return new LoopWhileInstruciton(manager, xml);
             case "loop": return new LoopInstruction(manager, xml);
+            case "camera_seteffects": return new SetCameraEffectsInstruction(manager, xml);
+            case "camera_addeffects": return new AddCameraEffectsInstruction(manager, xml);
+            case "camera_cleareffects": return new ClearCameraEffectsInstruction(manager, xml);
             default:
                 Debug.LogWarning("No instruction registered for " + xml.Name);
                 return null;
