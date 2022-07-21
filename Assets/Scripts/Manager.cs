@@ -52,9 +52,11 @@ public class Manager : MonoBehaviour
         foreach (PlatformPlayer platformPlayer in players)
         {
             bool isPlatform = platformPlayer.platform == platform;
-            platformPlayer.player.SetActive(isPlatform);
             if (isPlatform)
-                currentPlayer = platformPlayer.player;
+            {
+                currentPlayer = GameObject.Instantiate(platformPlayer.player, new Vector3(0f, 0f, 0f), Quaternion.identity);
+                break;
+            }
         }
     }
 
