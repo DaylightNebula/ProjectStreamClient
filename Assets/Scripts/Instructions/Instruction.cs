@@ -23,6 +23,7 @@ public abstract class Instruction
             case "point_createfromentityraycast": return new CreatePointFromRaycastInstruction(manager, xml);
             case "point_moveentity": return new MoveEntityToPointInstruction(manager, xml);
             case "sound_playfromentity": return new PlaySoundFromEntityInstruction(manager, xml);
+            case "sound_playatposition": return new PlaySoundAtPositionInstruction(manager, xml);
             case "event_call": return new CallEventInstruction(manager, xml);
             case "rigidbody_applyforce": return new ApplyForceToRigidbodyInstruction(manager, xml);
             case "user_move": return new UserMoveInstruction(manager, xml);

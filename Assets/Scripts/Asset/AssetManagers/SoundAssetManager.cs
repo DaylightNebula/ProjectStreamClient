@@ -140,6 +140,18 @@ public class SoundAssetManager : AssetManager
         }
     }
 
+    public void playSoundAtPosition(Manager manager, Vector3 position, string id, float volume)
+    {
+        // if we have sound play it now
+        if (sounds.ContainsKey(id))
+        {
+            AudioSource.PlayClipAtPoint(sounds[id], position, volume);
+        }
+        // otherwise request
+        else
+            Request(manager, id);
+    }
+
     class WaitingForSound
     {
         public AudioSource source;
