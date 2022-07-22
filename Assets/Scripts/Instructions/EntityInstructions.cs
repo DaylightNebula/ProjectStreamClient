@@ -108,3 +108,83 @@ public class MoveEntityInstruction : Instruction
         else entity.transform.position = targetPosition;
     }
 }
+public class SetEntityParticleEmitterInstruction: Instruction
+{
+    // mandatory stuff
+    string entityID;
+    bool enabled;
+
+    // not mandatory stuff
+    string texture;
+    Vector3 directionScale;
+    float lifetime;
+    float duration;
+    float speed;
+    float size;
+    float rate;
+
+    public SetEntityParticleEmitterInstruction(Manager manager, XmlNode xml): base(manager, xml)
+    {
+        // unpack mandatory
+        entityID = xml.Attributes["entity"].Value;
+        enabled = XMLDecoder.decodeBoolean(xml.Attributes["enabled"], true);
+
+        // unpack not mandatory
+        texture = XMLDecoder.decodeString(xml.Attributes["texture"], "");
+        directionScale = XMLDecoder.decodeVector(xml.Attributes["direction_scale"], new Vector3(1f, 1f, 1f));
+        lifetime = XMLDecoder.decodeFloat(xml.Attributes["lifetime"], 5f);
+        duration = XMLDecoder.decodeFloat(xml.Attributes["duration"], 5f);
+        speed = XMLDecoder.decodeFloat(xml.Attributes["speed"], 5f);
+        size = XMLDecoder.decodeFloat(xml.Attributes["size"], 1f);
+        rate = XMLDecoder.decodeFloat(xml.Attributes["rate"], 1f);
+    }
+
+    public override void execute(Manager manager)
+    {
+        // try to get entity
+        if (!manager.entities.ContainsKey(entityID)) return;
+        EntityManager entity = manager.entities[entityID].GetComponent<EntityManager>();
+
+        // update particle emitter in entity
+        entity.setParticleEmitter(enabled, directionScale, texture, lifetime, duration, speed, size, rate);
+    }
+}
+public class CreateParticleBurstAtEntityInstruction : Instruction
+{
+    // mandatory stuff
+    string entityID;
+    bool enabled;
+
+    // not mandatory stuff
+    string texture;
+    Vector3 directionScale;
+    float count;
+    float duration;
+    float speed;
+    float size;
+
+    public CreateParticleBurstAtEntityInstruction(Manager manager, XmlNode xml) : base(manager, xml)
+    {
+        // unpack mandatory
+        entityID = xml.Attributes["entity"].Value;
+        enabled = XMLDecoder.decodeBoolean(xml.Attributes["enabled"], true);
+
+        // unpack not mandatory
+        texture = XMLDecoder.decodeString(xml.Attributes["texture"], "");
+        directionScale = XMLDecoder.decodeVector(xml.Attributes["direction_scale"], new Vector3(1f, 1f, 1f));
+        count = XMLDecoder.decodeFloat(xml.Attributes["lifetime"], 30f);
+        duration = XMLDecoder.decodeFloat(xml.Attributes["duration"], 5f);
+        speed = XMLDecoder.decodeFloat(xml.Attributes["speed"], 5f);
+        size = XMLDecoder.decodeFloat(xml.Attributes["size"], 1f);
+    }
+
+    public override void execute(Manager manager)
+    {
+        // try to get entity
+        if (!manager.entities.ContainsKey(entityID)) return;
+        EntityManager entity = manager.entities[entityID].GetComponent<EntityManager>();
+
+        // update particle emitter in entity
+        entity.createParticleBurst(directionScale, texture, duration, count, speed, size);
+    }
+}

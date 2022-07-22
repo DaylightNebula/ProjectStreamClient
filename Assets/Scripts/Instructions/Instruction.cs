@@ -18,6 +18,8 @@ public abstract class Instruction
             case "entity_settransform": return new EntitySetTransformInstruction(manager, xml);
             case "entity_setactive": return new SetEntityActiveInstruction(manager, xml);
             case "entity_move": return new MoveEntityInstruction(manager, xml);
+            case "entity_setparticleemitter": return new SetEntityParticleEmitterInstruction(manager, xml);
+            case "entity_createparticleburst": return new CreateParticleBurstAtEntityInstruction(manager, xml);
             case "point_createfromentityraycast": return new CreatePointFromRaycastInstruction(manager, xml);
             case "point_moveentity": return new MoveEntityToPointInstruction(manager, xml);
             case "sound_playfromentity": return new PlaySoundFromEntityInstruction(manager, xml);
@@ -34,7 +36,7 @@ public abstract class Instruction
             case "camera_addeffects": return new AddCameraEffectsInstruction(manager, xml);
             case "camera_cleareffects": return new ClearCameraEffectsInstruction(manager, xml);
             default:
-                Debug.LogWarning("No instruction registered for " + xml.Name);
+                Debug.LogError("No instruction registered for " + xml.Name);
                 return null;
         }
     }

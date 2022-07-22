@@ -14,6 +14,9 @@ public class EntityManager : MonoBehaviour
     public Rigidbody rigidbody;
     public Light light;
 
+    // particle stuffs
+    ParticleSystemRenderer particleRenderer;
+
     Vector3 position;
     Quaternion rotation;
     Vector3 scale;
@@ -199,11 +202,9 @@ public class EntityManager : MonoBehaviour
         {
             // get particle system and renderer
             ParticleSystem system = gameObject.GetComponent<ParticleSystem>();
-            ParticleSystemRenderer renderer = gameObject.GetComponent<ParticleSystemRenderer>();
 
             // if they exist, destroy them
             if (system != null) Destroy(system);
-            if (renderer != null) Destroy(renderer);
 
             // cancel function
             return;
@@ -214,6 +215,7 @@ public class EntityManager : MonoBehaviour
         DestroyAfterTime destroyer = gameObject.AddComponent<DestroyAfterTime>();
 
         // set kill time
+        destroyer.objectToDestroy = particleSystem;
         destroyer.destroySeconds = lifetime;
 
         // set particle
@@ -223,9 +225,59 @@ public class EntityManager : MonoBehaviour
         ParticleSystem.EmissionModule emission = particleSystem.emission;
         emission.rate = rate;
         ParticleSystem.ShapeModule shape = particleSystem.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
         shape.scale = directionScale;
 
         // set particle texture
-        manager.assetPacketHandler.textureAssetManager.setTexture(manager, gameObject.AddComponent<ParticleSystemRenderer>(), texture);
+        if (particleRenderer == null)
+        {
+            gameObject.AddComponent<ParticleSystemRenderer>();
+            particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
+        }
+        manager.assetPacketHandler.textureAssetManager.setTexture(manager, particleRenderer, texture);
+    }
+
+    public void createParticleBurst(Vector3 directionScale, string texture, float duration, float count, float speed, float size)
+    {
+        // if particle emitter should not be enabled, any particle system or renderer must be removed
+        if (!enabled)
+        {
+            // get particle system and renderer
+            ParticleSystem system = gameObject.GetComponent<ParticleSystem>();
+
+            // if they exist, destroy them
+            if (system != null) Destroy(system);
+
+            // cancel function
+            return;
+        }
+
+        // create object and get components
+        ParticleSystem particleSystem = gameObject.AddComponent<ParticleSystem>();
+        DestroyAfterTime destroyer = gameObject.AddComponent<DestroyAfterTime>();
+
+        // set kill time
+        destroyer.objectToDestroy = particleSystem;
+        destroyer.destroySeconds = duration;
+
+        // set particle
+        particleSystem.startLifetime = duration;
+        particleSystem.startSpeed = speed;
+        particleSystem.startSize = size;
+        ParticleSystem.EmissionModule emission = particleSystem.emission;
+        emission.burstCount = 1;
+        emission.SetBurst(0, new ParticleSystem.Burst(0, count));
+        emission.rate = 0;
+        ParticleSystem.ShapeModule shape = particleSystem.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.scale = directionScale;
+
+        // set particle texture
+        if (particleRenderer == null)
+        {
+            gameObject.AddComponent<ParticleSystemRenderer>();
+            particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
+        }
+        manager.assetPacketHandler.textureAssetManager.setTexture(manager, particleRenderer, texture);
     }
 }

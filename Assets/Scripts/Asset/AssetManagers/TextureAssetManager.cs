@@ -137,7 +137,6 @@ public class TextureAssetManager : AssetManager
 
     private void applyTexture(Manager manager, ParticleSystemRenderer particle, Texture2D texture)
     {
-        Debug.Log("Updated particle textures for");
         Material material = new Material(manager.particleShader);
         material.SetTexture("_MainTex", texture);
         material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
@@ -168,6 +167,7 @@ public class TextureAssetManager : AssetManager
 
     public void setTexture(Manager manager, ParticleSystemRenderer particle, string textureID)
     {
+        if (particle == null) Debug.Log("Particle null");
         if (manager.textures.ContainsKey(textureID))
         {
             applyTexture(manager, particle, manager.textures[textureID]);
