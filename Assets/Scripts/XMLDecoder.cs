@@ -19,34 +19,16 @@ public class XMLDecoder
         switch(type)
         {
             case 0:
-                decodeScene(document.FirstChild);
+                decodeScene(manager, document.FirstChild);
                 break;
             case 1:
-                decodeActions(document.FirstChild);
+                decodeActions(manager, document.FirstChild);
                 break;
             case 2:
-                InstructionContainer instructions = decodeInstructions(document.FirstChild);
-                switch(instructions.executeTime)
-                {
-                    case "on_update":
-                        manager.actionManager.addAction(
-                            new Action(
-                                "#update",
-                                new Condition[] { new OnUpdateCondition() },
-                                instructions.instructions
-                            )
-                        );
-                        break;
-                    case "now":
-                        Instruction.runInstructions(manager, instructions);
-                        break;
-                    default:
-                        Debug.Log("Unknow execute time " + instructions.executeTime);
-                        break;
-                }
+                decodeInstructions(manager, document.FirstChild);
                 break;
             case 3:
-                decodeEntity(document.FirstChild);
+                decodeEntity(manager, document.FirstChild);
                 break;
             default:
                 Debug.LogWarning("No xml file type " + type + " was created!");
@@ -54,17 +36,25 @@ public class XMLDecoder
         }
     }
 
-    public void decodeScene(XmlNode xml)
+    public static void decodeScene(Manager manager, XmlNode xml)
     {
-        // loop through all entities in the scene and decode them
-        XmlNodeList entities = xml.ChildNodes;
-        foreach (XmlNode xmlEntity in entities)
+        // loop through children
+        foreach (XmlNode child in xml.ChildNodes)
         {
-            decodeEntity(xmlEntity);
+            // if entities, loop through childs children and create the entities
+            if (child.Name == "entities")
+                foreach (XmlNode entity in child.ChildNodes)
+                    decodeEntity(manager, entity);
+            else if (child.Name == "instructionsets")
+                foreach (XmlNode set in child.ChildNodes)
+                    decodeInstructions(manager, set);
+            else if (child.Name == "actionmaps")
+                foreach (XmlNode map in child.ChildNodes)
+                    decodeActions(manager, map);
         }
     }
 
-    public void decodeEntity(XmlNode xml)
+    public static void decodeEntity(Manager manager, XmlNode xml)
     {
         // return if comment
         if (xml.OuterXml.StartsWith("<!--")) return;
@@ -94,11 +84,11 @@ public class XMLDecoder
             decodeComponent(entity.GetComponent<EntityManager>(), componentNode);
     }
 
-    public void decodeActions(XmlNode xmls)
+    public static void decodeActions(Manager manager, XmlNode xmls)
     {
         // make sure actions are for our plaform
-        string platform = xmls.Attributes["type"].Value;
-        if (platform != manager.platform) return;
+        string platform = xmls.Attributes["platform"].Value;
+        if (platform != manager.platform && platform != "any") return;
 
         // loop through each action and decompile it
         foreach (XmlNode xml in xmls.ChildNodes)
@@ -110,14 +100,14 @@ public class XMLDecoder
             manager.actionManager.addAction(
                 new Action(
                     xml.Attributes["name"].Value,
-                    decodeConditions(conditionsXML),
-                    decodeInstructionToArray(instructionsXML)
+                    decodeConditions(manager, conditionsXML),
+                    decodeInstructionToArray(manager, instructionsXML)
                 )
             );
         }
     }
 
-    public Condition[] decodeConditions(XmlNode xml)
+    public static Condition[] decodeConditions(Manager manager, XmlNode xml)
     {
         // create condition array and return
         Condition[] conditions = new Condition[xml.ChildNodes.Count];
@@ -126,29 +116,49 @@ public class XMLDecoder
         return conditions;
     }
 
-    public Instruction[] decodeInstructionToArray(XmlNode xml)
+    public static Instruction[] decodeInstructionToArray(Manager manager, XmlNode xml)
     {
         // create instruction array
         Instruction[] instructions = new Instruction[xml.ChildNodes.Count];
 
         // loop through all instructions
         for (int i = 0; i < instructions.Length; i++)
-            instructions[i] = decodeInstruction(xml.ChildNodes.Item(i));
+            instructions[i] = decodeInstruction(manager, xml.ChildNodes.Item(i));
 
         return instructions;
     }
 
-    public InstructionContainer decodeInstructions(XmlNode xml) 
+    public static void decodeInstructions(Manager manager, XmlNode xml) 
     {
-        return new InstructionContainer(xml.Attributes["run"].Value, decodeInstructionToArray(xml));
+        string run = xml.Attributes["run"].Value;
+        Instruction[] instructions = decodeInstructionToArray(manager, xml);
+
+        switch (run)
+        {
+            case "on_update":
+                manager.actionManager.addAction(
+                    new Action(
+                        "#update",
+                        new Condition[] { new OnUpdateCondition() },
+                        instructions
+                    )
+                );
+                break;
+            case "now":
+                Instruction.runInstructions(manager, instructions);
+                break;
+            default:
+                Debug.Log("Unknow run time " + run);
+                break;
+        }
     }
 
-    public Instruction decodeInstruction(XmlNode xml)
+    public static Instruction decodeInstruction(Manager manager, XmlNode xml)
     {
         return Instruction.getCompiledInstruction(manager, xml);
     }
 
-    public void decodeComponent(EntityManager entity, XmlNode xml)
+    public static void decodeComponent(EntityManager entity, XmlNode xml)
     {
         switch(xml.Name)
         {
@@ -193,8 +203,11 @@ public class XMLDecoder
                     decodeFloat(xml.Attributes["rate"], 1f)
                 );
                 break;
+            case "instructionset":
+                XMLDecoder.decodeInstructions(entity.manager, xml);
+                break;
             default:
-                Debug.LogWarning("No component made for " + xml.Name);
+                Debug.LogError("No component made for " + xml.Name);
                 break;
         }
     }

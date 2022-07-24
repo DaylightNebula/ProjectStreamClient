@@ -22,13 +22,48 @@ public class EntityManager : MonoBehaviour
     Vector3 scale;
     bool isActive = true;
 
-    void Update()
+    // instruction stuffs
+    Instruction[] onUpdateInstructions;
+    Instruction[] onMoveInstructions;
+    Instruction[] onRotateInstructions;
+    Instruction[] onScaleInstructions;
+
+    void FixedUpdate()
     {
-        // check if update to state
-        if (position != transform.position || rotation != transform.rotation || scale != transform.localScale)
+        bool updateServer = false;
+
+        // call update instructions
+        if (onUpdateInstructions != null) Instruction.runInstructions(manager, onUpdateInstructions);
+
+        // if move call instructions for that
+        if (position != transform.position)
         {
-            sendEntityTransformUpdate();
+            updateServer = true;
+            if (onMoveInstructions != null) Instruction.runInstructions(manager, onMoveInstructions);
         }
+
+        // if move call instructions for that
+        if (rotation != transform.rotation)
+        {
+            updateServer = true;
+            if (onRotateInstructions != null) Instruction.runInstructions(manager, onRotateInstructions);
+        }
+
+        // if move call instructions for that
+        if (scale != transform.localScale)
+        {
+            updateServer = true;
+            if (onScaleInstructions != null) Instruction.runInstructions(manager, onScaleInstructions);
+        }
+
+        // if we need to update the servers entity, do so
+        if (updateServer)
+            sendEntityTransformUpdate();
+
+        // update trackers
+        position = transform.position;
+        rotation = transform.rotation;
+        scale = transform.localScale;
     }
 
     void OnEnable()
@@ -44,39 +79,7 @@ public class EntityManager : MonoBehaviour
     }
 
     void sendEntityTransformUpdate()
-    {
-        /*// update tracking variables
-        position = transform.position;
-        rotation = transform.rotation;
-        scale = transform.localScale;
-        isActive = gameObject.activeSelf;
-
-        // build int array for id
-        int[] idArray = new int[1];
-        idArray[0] = entityID;
-
-        // build float array for positions
-        Vector3 rotationEuler = rotation.eulerAngles;
-        float[] floatArray = new float[9];
-        floatArray[0] = position.x;
-        floatArray[1] = position.y;
-        floatArray[2] = position.z;
-        floatArray[3] = rotationEuler.x;
-        floatArray[4] = rotationEuler.y;
-        floatArray[5] = rotationEuler.z;
-        floatArray[6] = scale.x;
-        floatArray[7] = scale.y;
-        floatArray[8] = scale.z;
-
-        // build packet
-        byte[] data = new byte[41];
-        Buffer.BlockCopy(idArray, 0, data, 0, 4);
-        Buffer.BlockCopy(floatArray, 0, data, 4, 36);
-        if (isActive) data[40] = 1; else data[40] = 0;
-
-        // send update packet to client
-        manager.behaviorClient.sendPacket(0x08, data);*/
-    }
+    {}
 
     public void remove()
     {
@@ -279,5 +282,30 @@ public class EntityManager : MonoBehaviour
             particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
         }
         manager.assetPacketHandler.textureAssetManager.setTexture(manager, particleRenderer, texture);
+    }
+
+    public void useInstructions(string run, Instruction[] instructions)
+    {
+        switch(run)
+        {
+            case "now":
+                Instruction.runInstructions(manager, instructions);
+                break;
+            case "on_update":
+                onUpdateInstructions = instructions;
+                break;
+            case "on_move":
+                onMoveInstructions = instructions;
+                break;
+            case "on_rotate":
+                onRotateInstructions = instructions;
+                break;
+            case "on_scale":
+                onScaleInstructions = instructions;
+                break;
+            default:
+                Debug.LogError("Unknown entity run time " + run);
+                break;
+        }
     }
 }

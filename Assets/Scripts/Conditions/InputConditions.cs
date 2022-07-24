@@ -1,41 +1,13 @@
-using System.Xml;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
+using System.Xml;
+using UnityEngine;
 
-public abstract class Condition
-{
-    public Condition(Manager manager, XmlNode xml) {}
-    public abstract bool isConditionMet(Manager manager);
-
-    // STATIC
-    public static Condition getCompiledCondition(Manager manager, XmlNode xml)
-    {
-        switch(xml.Name)
-        {
-            case "buttonstate":
-                return new ButtonStateCondition(manager, xml);
-            default:
-                Debug.LogWarning("No condition made for " + xml.Name);
-                return null;
-        }
-    }
-}
-public class OnUpdateCondition: Condition
-{
-    public OnUpdateCondition() : base(null, null) { }
-
-    public override bool isConditionMet(Manager manager)
-    {
-        return true;
-    }
-}
-public class ButtonStateCondition: Condition
+public class ButtonStateCondition : Condition
 {
     string button;
     string state;
 
-    public ButtonStateCondition(Manager manager, XmlNode xml) : base(manager, xml) 
+    public ButtonStateCondition(Manager manager, XmlNode xml) : base(manager, xml)
     {
         button = xml.Attributes["button"].Value;
         state = XMLDecoder.decodeString(xml.Attributes["state"], "up");
@@ -52,7 +24,7 @@ public class ButtonStateCondition: Condition
                 else if (button == "mouse right") buttonID = 1;
                 else if (button == "mouse middle") buttonID = 2;
                 return Input.GetMouseButtonUp(buttonID);
-            } 
+            }
             else
                 return Input.GetKeyUp((KeyCode)Enum.Parse(typeof(KeyCode), button, true));
         }
@@ -84,7 +56,8 @@ public class ButtonStateCondition: Condition
                 return Input.GetKey((KeyCode)Enum.Parse(typeof(KeyCode), button, true));
             }
         }
-        else {
+        else
+        {
             Debug.LogWarning("No button state created for " + state + " in ButtonStateCondition");
             return false;
         }

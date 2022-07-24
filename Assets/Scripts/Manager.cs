@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Manager : MonoBehaviour
 {
@@ -35,6 +37,12 @@ public class Manager : MonoBehaviour
     private Dictionary<string, KeyValuePair<Vector3, Vector3>> points = new Dictionary<string, KeyValuePair<Vector3, Vector3>>();
     private Dictionary<string, float> variables = new Dictionary<string, float>();
 
+    // imports from jslib
+#if UNITY_WEBGL
+    [DllImport("__Internal")]
+    private static extern bool IsMobile();
+#endif
+
     void Awake()
     {
         // create input manager
@@ -48,6 +56,15 @@ public class Manager : MonoBehaviour
 
         // create xml decoder
         xmlDecoder = new XMLDecoder(this);
+
+        // set platform TODO xr detection
+#if UNITY_EDITOR
+        platform = "desktop";
+#elif UNITY_WEBGL
+        if (IsMobile()) platform = "mobile";
+        else platform = "desktop";
+        Debug.Log("WEBGL platform " + platform);
+#endif
 
         // set active state of platforms
         foreach (PlatformPlayer platformPlayer in players)

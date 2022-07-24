@@ -12,12 +12,12 @@ class IfInstruction: Instruction
         foreach (XmlNode child in children)
         {
             if (child.Name == "conditions")
-                conditions = manager.xmlDecoder.decodeConditions(child);
+                conditions = XMLDecoder.decodeConditions(manager, child);
             else if (child.Name == "instructions")
             {
                 instructions = new Instruction[child.ChildNodes.Count];
                 for (int i = 0; i < child.ChildNodes.Count; i++)
-                    instructions[i] = manager.xmlDecoder.decodeInstruction(child.ChildNodes.Item(i));
+                    instructions[i] = XMLDecoder.decodeInstruction(manager, child.ChildNodes.Item(i));
             }
         }
     }
@@ -54,12 +54,12 @@ class LoopWhileInstruciton : Instruction
         foreach (XmlNode child in children)
         {
             if (child.Name == "conditions")
-                conditions = manager.xmlDecoder.decodeConditions(child);
+                conditions = XMLDecoder.decodeConditions(manager, child);
             else if (child.Name == "instructions")
             {
                 instructions = new Instruction[child.ChildNodes.Count];
                 for (int i = 0; i < child.ChildNodes.Count; i++)
-                    instructions[i] = manager.xmlDecoder.decodeInstruction(child.ChildNodes.Item(i));
+                    instructions[i] = XMLDecoder.decodeInstruction(manager, child.ChildNodes.Item(i));
             }
         }
     }
@@ -101,7 +101,7 @@ class LoopInstruction : Instruction
 
         instructions = new Instruction[xml.ChildNodes.Count];
         for (int i = 0; i < xml.ChildNodes.Count; i++)
-            instructions[i] = manager.xmlDecoder.decodeInstruction(xml.ChildNodes.Item(i));
+            instructions[i] = XMLDecoder.decodeInstruction(manager, xml.ChildNodes.Item(i));
     }
 
     public override void execute(Manager manager)

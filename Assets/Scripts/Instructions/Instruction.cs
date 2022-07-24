@@ -42,9 +42,9 @@ public abstract class Instruction
         }
     }
 
-    public static void runInstructions(Manager manager, InstructionContainer instructions)
+    public static void runInstructions(Manager manager, Instruction[] instructions)
     {
-        foreach (Instruction i in instructions.instructions)
+        foreach (Instruction i in instructions)
             i.execute(manager);
     }
 }

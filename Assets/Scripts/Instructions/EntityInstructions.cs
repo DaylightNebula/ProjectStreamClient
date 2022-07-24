@@ -14,7 +14,7 @@ public class EntitySpawnInstruction : Instruction
     public override void execute(Manager manager)
     {
         foreach (XmlNode entity in xml.ChildNodes)
-            manager.xmlDecoder.decodeEntity(entity);
+            XMLDecoder.decodeEntity(manager, entity);
     }
 }
 public class EntityRemoveInstruction : Instruction
